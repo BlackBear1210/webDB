@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}FitQR - 운동 기록{% endblock %}
+
+{% block content %}
+<div class="app-header">
+    <span class="h-title">📊 운동 기록</span>
+</div>
+
+<div class="page">
+    <!-- 요약 통계 -->
+    <div class="welcome">
+        <div class="hi">{{ session['name'] }}님의 운동 통계</div>
+        <div class="sub">
+            총 <b>{{ total_sessions }}</b>회 운동 · 총 <b>{{ total_reps }}</b>회 반복
+        </div>
+    </div>
+
+    {% if sessions %}
+        <h2 class="section-title">운동 내역</h2>
+        {% for s in sessions %}
+        <a href="/workout/{{ s[0] }}/done/" class="card" style="display:block; text-decoration:none; color:#333;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <div style="font-weight:800; font-size:16px;">🏋️ {{ s[1] }}</div>
+                    <div class="muted" style="margin-top:4px;">{{ s[2] }} · {{ s[4] }}</div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="color:#e74c3c; font-weight:800;">{{ s[3] }}kg</div>
+                    <div class="muted">{{ s[6] }}세트 · {{ s[7] }}회</div>
+                </div>
+            </div>
+            <div style="margin-top:8px;">
+                {% if s[5] == '완료' %}
+                    <span style="background:#eafaf1; color:#27ae60; padding:3px 10px; border-radius:10px; font-size:11px; font-weight:700;">✅ 완료</span>
+                {% else %}
+                    <span style="background:#fef5e7; color:#e67e22; padding:3px 10px; border-radius:10px; font-size:11px; font-weight:700;">⏳ 진행중</span>
+                {% endif %}
+            </div>
+        </a>
+        {% endfor %}
+    {% else %}
+        <div class="card text-center">
+            <div class="big-emoji">🏃</div>
+            <p class="muted" style="margin-top:10px;">아직 운동 기록이 없어요.</p>
+            <a href="/machines/" class="btn btn-block">운동 시작하기 ▶</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

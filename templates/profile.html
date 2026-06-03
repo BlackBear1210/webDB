@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}FitQR - 건강 진단{% endblock %}
+
+{% block content %}
+<div class="app-header">
+    <span class="h-title">📝 건강 진단</span>
+</div>
+
+<div class="page">
+    <div class="card-tip">
+        💡 내 몸 상태와 목표를 입력하면 <b>맞춤 운동 루틴과 식단</b>을 추천해드려요.
+        지병/수술 이력이 있으면 <b>재활 루틴</b>으로 안내합니다.
+    </div>
+
+    <form method="post">
+        <div class="card">
+            <h2 class="section-title">🎯 목표</h2>
+            <label>운동 목표</label>
+            <select name="goal" id="goal">
+                <option value="살빼기" {% if p and p[9]=='살빼기' %}selected{% endif %}>살빼기 (다이어트)</option>
+                <option value="근성장" {% if not p or p[9]=='근성장' %}selected{% endif %}>근성장</option>
+                <option value="벌크업" {% if p and p[9]=='벌크업' %}selected{% endif %}>벌크업</option>
+            </select>
+
+            <label>활동량</label>
+            <select name="activity_level" id="activity_level">
+                <option value="좌식" {% if p and p[8]=='좌식' %}selected{% endif %}>좌식 (거의 안 움직임)</option>
+                <option value="보통" {% if not p or p[8]=='보통' %}selected{% endif %}>보통 (주 1~3회 운동)</option>
+                <option value="활발" {% if p and p[8]=='활발' %}selected{% endif %}>활발 (주 4회 이상)</option>
+            </select>
+
+            <label>하루 수면 시간 (시간)</label>
+            <input type="number" name="sleep_hours" step="0.5" value="{{ p[7] if p else 7 }}">
+        </div>
+
+        <div class="card">
+            <h2 class="section-title">🏋️ 3대 무게 (kg)</h2>
+            <div class="row2">
+                <div>
+                    <label>스쿼트</label>
+                    <input type="number" name="squat" value="{{ p[2]|int if p else '' }}" placeholder="0">
+                </div>
+                <div>
+                    <label>벤치</label>
+                    <input type="number" name="bench" value="{{ p[3]|int if p else '' }}" placeholder="0">
+                </div>
+            </div>
+            <label>데드리프트</label>
+            <input type="number" name="deadlift" value="{{ p[4]|int if p else '' }}" placeholder="0">
+        </div>
+
+        <div class="card">
+            <h2 class="section-title">🩺 건강 상태</h2>
+            <label>지병 (없으면 비워두세요)</label>
+            <input type="text" name="diseases" value="{{ p[5] if p else '' }}" placeholder="예: 허리디스크, 무릎 통증">
+
+            <label>수술 이력 (없으면 비워두세요)</label>
+            <input type="text" name="surgery_history" value="{{ p[6] if p else '' }}" placeholder="예: 어깨 수술">
+        </div>
+
+        <input type="button" value="진단 저장하고 추천받기 🎯" class="btn btn-block"
+               onclick="document.querySelector('form').submit();">
+    </form>
+</div>
+{% endblock %}

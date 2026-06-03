@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}FitQR - 운동 중{% endblock %}
+
+{% block content %}
+<div class="app-header">
+    <span class="h-title">💪 {{ ws[8] }}</span>
+    <span class="h-act">{{ ws[3] }}kg · {{ next_set }}/{{ ws[4] }}세트</span>
+</div>
+
+<div class="page">
+    <!-- Rep 카운터 (센서 시뮬레이션) -->
+    <div class="card">
+        <p class="muted text-center">이번 세트 카운트</p>
+        <div class="rep-num" id="repCount">0</div>
+
+        <p class="muted text-center">
+            당긴 가동범위 (최소 <b style="color:#e67e22;">{{ ws[10] }}cm</b> 이상이어야 카운트)
+        </p>
+        <input type="range" min="0" max="40" value="25" class="rom-slider"
+               id="rom" oninput="updateRom(this.value)">
+        <div class="rom-display"><span id="romVal">25</span> cm</div>
+
+        <button class="pull-btn" onclick="doRep()">💪 당기기 (Rep)</button>
+        <div class="rep-msg" id="repMsg"></div>
+
+        <div class="btn-group">
+            <form method="post" action="/workout/{{ ws[0] }}/set/" id="setForm">
+                <input type="hidden" name="reps" id="reps" value="0">
+                <button type="submit" class="btn">세트 완료 💾</button>
+            </form>
+            <form method="post" action="/workout/{{ ws[0] }}/end/">
+                <button type="submit" class="btn btn-gray">종목 종료 ⏹</button>
+            </form>
+        </div>
+    </div>
+
+    {% if sets %}
+    <div class="card">
+        <h2 class="section-title">완료한 세트</h2>
+        <table>
+            <tr><th>세트</th><th>무게</th><th>횟수</th><th>판정</th></tr>
+            {% for s in sets %}
+            <tr>
+                <td>{{ s[2] }}세트</td>
+                <td>{{ s[4] }}kg</td>
+                <td>{{ s[3] }}회</td>
+                <td>{% if s[5] == 1 %}✅{% else %}❌{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    const MIN_ROM = {{ ws[10] }};
+    let reps = 0;
+    function updateRom(v){ document.getElementById('romVal').innerText = v; }
+    function doRep(){
+        const rom = parseInt(document.getElementById('rom').value);
+        const msg = document.getElementById('repMsg');
+        if(rom >= MIN_ROM){
+            reps++;
+            document.getElementById('repCount').innerText = reps;
+            document.getElementById('reps').value = reps;
+            msg.style.color = '#27ae60';
+            msg.innerText = '✅ 카운트! (' + rom + 'cm)';
+        } else {
+            msg.style.color = '#e74c3c';
+            msg.innerText = '❌ 가동범위 부족 (' + rom + ' < ' + MIN_ROM + 'cm)';
+        }
+    }
+</script>
+{% endblock %}

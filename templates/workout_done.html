@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}FitQR - 운동 완료{% endblock %}
+
+{% block content %}
+<div class="app-header">
+    <span class="h-title">운동 완료</span>
+    <a href="/" class="h-act">메인</a>
+</div>
+
+<div class="page">
+    <div class="card text-center">
+        <div class="big-emoji">✅</div>
+        <h1 style="font-size:23px; margin:8px 0;">{{ ws[8] }} 완료!</h1>
+        <p class="muted">
+            <b style="color:#e74c3c;">{{ ws[3] }}kg</b> ·
+            <b style="color:#e74c3c;">{{ sets|length }}세트</b> ·
+            총 <b style="color:#e74c3c;">{{ total_reps }}회</b>
+        </p>
+        <p class="muted" style="margin-top:6px;">
+            {{ ws[5] }} ~ {{ ws[6] }}
+        </p>
+    </div>
+
+    <div class="card">
+        <h2 class="section-title">세트별 기록</h2>
+        <table>
+            <tr><th>세트</th><th>무게</th><th>횟수</th><th>판정</th></tr>
+            {% for s in sets %}
+            <tr>
+                <td>{{ s[2] }}세트</td>
+                <td>{{ s[4] }}kg</td>
+                <td>{{ s[3] }}회</td>
+                <td>{% if s[5] == 1 %}✅{% else %}❌{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <a href="/machines/" class="btn btn-block">다음 기구 운동 ▶</a>
+    <a href="/" class="btn btn-gray btn-block">메인으로</a>
+</div>
+{% endblock %}

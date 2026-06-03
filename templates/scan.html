@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}FitQR - QR 스캔{% endblock %}
+
+{% block head %}
+<script src="/static/html5-qrcode.min.js"></script>
+<style>
+    #reader { width: 100%; border-radius: 14px; overflow: hidden; }
+    #reader video { border-radius: 14px; }
+    .scan-status { text-align:center; font-size:14px; font-weight:700; margin-top:12px; min-height:22px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="app-header">
+    <span><a href="/machines/" class="h-back">←</a><span class="h-title">📷 QR 스캔</span></span>
+</div>
+
+<div class="page">
+    <div class="card-tip">
+        💡 기구의 <b>QR을 카메라에 비추면</b> 자동으로 운동 화면으로 이동해요.
+        (노트북 웹캠 사용 — 카메라 권한을 허용해주세요)
+    </div>
+
+    <div class="card">
+        <div id="reader"></div>
+        <div class="scan-status" id="status" style="color:#888;">카메라 준비 중...</div>
+    </div>
+
+    <a href="/qrcodes/" class="btn btn-line btn-block">📄 기구 QR 코드 보기</a>
+    <a href="/machines/" class="btn btn-gray btn-block">기구 목록에서 직접 선택</a>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    const statusEl = document.getElementById('status');
+    let scanner = null;
+    let handled = false;
+
+    // 스캔 성공 처리: 디코딩된 문자열에서 기구 번호 추출
+    function onScanSuccess(decodedText) {
+        if (handled) return;               // 중복 이동 방지
+        const m = decodedText.match(/machine\/(\d+)/);   // .../machine/3/ → 3
+        if (m) {
+            handled = true;
+            statusEl.style.color = '#27ae60';
+            statusEl.innerText = '✅ 인식 완료! 이동 중...';
+            if (scanner) { scanner.stop().catch(()=>{}); }
+            // 현재 주소(origin) 기준으로 이동 → 로컬/배포 자동 대응
+            window.location.href = '/machine/' + m[1] + '/';
+        } else {
+            statusEl.style.color = '#e74c3c';
+            statusEl.innerText = '❌ FitQR 기구 QR이 아닙니다: ' + decodedText;
+        }
+    }
+
+    // 카메라 시작
+    Html5Qrcode.getCameras().then(cameras => {
+        if (cameras && cameras.length) {
+            scanner = new Html5Qrcode("reader");
+            scanner.start(
+                cameras[0].id,
+                { fps: 10, qrbox: 220 },
+                onScanSuccess,
+                () => {}                    // 프레임마다 실패하는 건 무시
+            ).then(() => {
+                statusEl.innerText = 'QR을 카메라에 비춰주세요';
+            }).catch(err => {
+                statusEl.style.color = '#e74c3c';
+                statusEl.innerText = '⚠️ 카메라를 시작할 수 없어요: ' + err;
+            });
+        } else {
+            statusEl.style.color = '#e74c3c';
+            statusEl.innerText = '⚠️ 사용 가능한 카메라가 없습니다.';
+        }
+    }).catch(err => {
+        statusEl.style.color = '#e74c3c';
+        statusEl.innerText = '⚠️ 카메라 권한을 허용해주세요.';
+    });
+</script>
+{% endblock %}

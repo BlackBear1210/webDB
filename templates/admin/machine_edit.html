@@ -1,0 +1,29 @@
+{% extends 'admin/admin_base.html' %}
+{% block title %}FitQR 관리자 - 기구수정{% endblock %}
+
+{% block content %}
+<h1 style="font-size:22px; color:#2c3e50; margin-bottom:20px;">🏋️ 기구 수정 (#{{ m[0] }})</h1>
+
+<div class="admin-card" style="max-width:520px;">
+    <form method="post" action="/admin/machines/{{ m[0] }}/edit/">
+        <div class="fld" style="margin-bottom:14px;">
+            <label style="display:block; margin-bottom:5px; font-size:13px; color:#666;">기구명</label>
+            <input type="text" name="name" value="{{ m[1] }}" required style="width:100%; padding:10px; border:1px solid #d8dde2; border-radius:8px;">
+        </div>
+        <div class="fld" style="margin-bottom:14px;">
+            <label style="display:block; margin-bottom:5px; font-size:13px; color:#666;">운동 부위</label>
+            <input type="text" name="body_part" value="{{ m[2] }}" required style="width:100%; padding:10px; border:1px solid #d8dde2; border-radius:8px;">
+        </div>
+        <div class="fld" style="margin-bottom:14px;">
+            <label style="display:block; margin-bottom:5px; font-size:13px; color:#666;">최소 가동범위 (cm)</label>
+            <input type="number" name="min_valid_rom" value="{{ m[3] }}" style="width:100%; padding:10px; border:1px solid #d8dde2; border-radius:8px;">
+        </div>
+        <div class="fld" style="margin-bottom:18px;">
+            <label style="display:block; margin-bottom:5px; font-size:13px; color:#666;">설명</label>
+            <input type="text" name="description" value="{{ m[4] }}" style="width:100%; padding:10px; border:1px solid #d8dde2; border-radius:8px;">
+        </div>
+        <button type="submit" class="btn-sm btn-edit" style="padding:10px 20px;">저장</button>
+        <a href="/admin/machines/" class="btn-sm btn-role" style="padding:10px 20px;">취소</a>
+    </form>
+</div>
+{% endblock %}

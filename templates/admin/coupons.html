@@ -1,0 +1,63 @@
+{% extends 'admin/admin_base.html' %}
+{% block title %}FitQR 관리자 - 쿠폰관리{% endblock %}
+
+{% block content %}
+<h1 style="font-size:22px; color:#2c3e50; margin-bottom:20px;">🎁 쿠폰 관리</h1>
+
+<!-- 쿠폰 등록 (CREATE) -->
+<div class="admin-card">
+    <h2>＋ 새 쿠폰 등록</h2>
+    <form method="post" action="/admin/coupons/add/" class="admin-form">
+        <div class="fld">
+            <label>제휴사</label>
+            <input type="text" name="partner_name" required placeholder="예: 마이프로틴">
+        </div>
+        <div class="fld">
+            <label>카테고리</label>
+            <select name="category">
+                <option value="프로틴">프로틴</option>
+                <option value="운동용품">운동용품</option>
+            </select>
+        </div>
+        <div class="fld">
+            <label>코드</label>
+            <input type="text" name="code" required placeholder="예: FITQR-XX10">
+        </div>
+        <div class="fld">
+            <label>할인</label>
+            <input type="text" name="discount" required placeholder="예: 10% 할인" style="width:120px;">
+        </div>
+        <div class="fld">
+            <label>재고</label>
+            <input type="number" name="total_qty" value="50" style="width:90px;">
+        </div>
+        <button type="submit" class="btn-sm btn-edit" style="padding:9px 16px;">등록</button>
+    </form>
+</div>
+
+<!-- 쿠폰 목록 (READ / DELETE) -->
+<div class="admin-card">
+    <h2>전체 쿠폰 ({{ coupons|length }}개)</h2>
+    <table class="admin-table">
+        <tr>
+            <th>번호</th><th>제휴사</th><th>카테고리</th><th>코드</th>
+            <th>할인</th><th>남은재고</th><th>지급됨</th><th>관리</th>
+        </tr>
+        {% for c in coupons %}
+        <tr>
+            <td>{{ c[0] }}</td>
+            <td>{{ c[1] }}</td>
+            <td>{{ c[2] }}</td>
+            <td style="font-family:monospace; color:#e74c3c;">{{ c[3] }}</td>
+            <td>{{ c[4] }}</td>
+            <td>{{ c[6] }}개</td>
+            <td>{{ c[7] }}회</td>
+            <td>
+                <a href="/admin/coupons/{{ c[0] }}/delete/" class="btn-sm btn-del"
+                   onclick="return confirm('정말 삭제할까요?');">삭제</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends 'admin/admin_base.html' %}
+{% block title %}FitQR 관리자 - 기구관리{% endblock %}
+
+{% block content %}
+<h1 style="font-size:22px; color:#2c3e50; margin-bottom:20px;">🏋️ 기구 관리</h1>
+
+<!-- 기구 등록 (CREATE) -->
+<div class="admin-card">
+    <h2>＋ 새 기구 등록</h2>
+    <form method="post" action="/admin/machines/add/" class="admin-form">
+        <div class="fld">
+            <label>기구명</label>
+            <input type="text" name="name" required placeholder="예: 랫풀다운">
+        </div>
+        <div class="fld">
+            <label>운동 부위</label>
+            <input type="text" name="body_part" required placeholder="예: 등">
+        </div>
+        <div class="fld">
+            <label>최소 가동범위(cm)</label>
+            <input type="number" name="min_valid_rom" value="10" style="width:130px;">
+        </div>
+        <div class="fld" style="flex:1; min-width:200px;">
+            <label>설명</label>
+            <input type="text" name="description" placeholder="기구 설명" style="width:100%;">
+        </div>
+        <button type="submit" class="btn-sm btn-edit" style="padding:9px 16px;">등록</button>
+    </form>
+</div>
+
+<!-- 기구 목록 (READ / UPDATE / DELETE) -->
+<div class="admin-card">
+    <h2>전체 기구 ({{ machines|length }}개)</h2>
+    <table class="admin-table">
+        <tr>
+            <th>번호</th><th>기구명</th><th>부위</th><th>최소ROM</th>
+            <th>설명</th><th>QR</th><th>관리</th>
+        </tr>
+        {% for m in machines %}
+        <tr>
+            <td>{{ m[0] }}</td>
+            <td>{{ m[1] }}</td>
+            <td>{{ m[2] }}</td>
+            <td>{{ m[3] }}cm</td>
+            <td style="max-width:240px; color:#888;">{{ m[4] }}</td>
+            <td><a href="/machine/{{ m[0] }}/qr.png" target="_blank" style="color:#3498db;">QR보기</a></td>
+            <td>
+                <a href="/admin/machines/{{ m[0] }}/edit/" class="btn-sm btn-edit">수정</a>
+                <a href="/admin/machines/{{ m[0] }}/delete/" class="btn-sm btn-del"
+                   onclick="return confirm('정말 삭제할까요?');">삭제</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

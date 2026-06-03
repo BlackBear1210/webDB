@@ -1,0 +1,417 @@
+/* ═══════════════════════════════════════════════
+   FitQR - 모바일 앱 테마 (갤럭시 S25 기준)
+   ═══════════════════════════════════════════════ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'Segoe UI', 'Malgun Gothic', '맑은 고딕', sans-serif;
+    background: linear-gradient(135deg, #2c3e50, #4a6075);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 0;
+}
+
+/* ───── 갤럭시 S25 폰 프레임 (19.5:9, 펀치홀) ───── */
+.phone-frame {
+    position: relative;
+    width: 375px;
+    height: 812px;
+    background: #0a0a0a;
+    border-radius: 46px;
+    padding: 12px;
+    box-shadow: 0 25px 70px rgba(0,0,0,0.55), inset 0 0 3px rgba(255,255,255,0.2);
+}
+.punch-hole {
+    position: absolute;
+    top: 22px; left: 50%;
+    transform: translateX(-50%);
+    width: 11px; height: 11px;
+    background: #000;
+    border-radius: 50%;
+    z-index: 10;
+    box-shadow: inset 0 0 2px rgba(40,40,60,0.9);
+}
+.phone-screen {
+    width: 100%; height: 100%;
+    background: #f4f5f7;
+    border-radius: 36px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+/* ───── 상태바 (One UI 스타일) ───── */
+.status-bar {
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 22px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a1a1a;
+    flex-shrink: 0;
+}
+.sb-icons { display: flex; align-items: center; gap: 5px; font-size: 11px; }
+.sb-net { font-weight: 800; }
+.sb-signal { font-size: 10px; }
+.batt-box {
+    display: inline-block;
+    width: 20px; height: 11px;
+    border: 1px solid #1a1a1a;
+    border-radius: 3px;
+    padding: 1px;
+    position: relative;
+}
+.batt-box::after {
+    content: ''; position: absolute; right: -3px; top: 3px;
+    width: 2px; height: 5px; background: #1a1a1a; border-radius: 0 1px 1px 0;
+}
+.batt-fill { display: block; width: 82%; height: 100%; background: #1a1a1a; border-radius: 1px; }
+
+/* ───── 앱 본문 (스크롤) ───── */
+.app-body {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.app-body::-webkit-scrollbar { width: 0; }
+
+/* 페이지 내부 패딩 래퍼 */
+.page { padding: 8px 18px 24px; }
+
+/* ───── 앱 헤더 ───── */
+.app-header {
+    background: #e74c3c;
+    color: #fff;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+.app-header .h-title { font-size: 19px; font-weight: 800; }
+.app-header .h-act { font-size: 13px; color: #fff; text-decoration: none; opacity: 0.95; }
+.app-header .h-back { font-size: 18px; color: #fff; text-decoration: none; margin-right: 4px; }
+
+/* ───── 하단 탭바 ───── */
+.tabbar {
+    height: 62px;
+    background: #ffffff;
+    border-top: 1px solid #eee;
+    display: flex;
+    flex-shrink: 0;
+}
+.tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    text-decoration: none;
+    color: #9aa0a6;
+    font-size: 11px;
+}
+.tab-ico { font-size: 20px; filter: grayscale(40%); }
+.tab.active { color: #e74c3c; font-weight: 700; }
+.tab.active .tab-ico { filter: grayscale(0%); }
+
+/* ───── 카드 ───── */
+.card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom: 16px;
+}
+.card-tip {
+    background: #fff3f0;
+    color: #c0392b;
+    border-radius: 14px;
+    padding: 14px 16px;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 16px;
+}
+
+/* ───── 섹션 타이틀 ───── */
+.section-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #2c3e50;
+    margin: 4px 0 14px;
+    padding-left: 10px;
+    border-left: 4px solid #e74c3c;
+}
+
+/* ───── 폼 ───── */
+label {
+    display: block;
+    margin: 14px 0 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #555;
+}
+input[type="text"], input[type="password"], input[type="number"], select {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1.5px solid #e3e6ea;
+    border-radius: 11px;
+    font-size: 15px;
+    background: #fafbfc;
+}
+input:focus, select:focus { outline: none; border-color: #e74c3c; background: #fff; }
+.row2 { display: flex; gap: 10px; }
+.row2 > div { flex: 1; }
+
+/* ───── 버튼 ───── */
+.btn {
+    display: inline-block;
+    background: #e74c3c;
+    color: #fff;
+    border: none;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    transition: background 0.15s, transform 0.08s;
+}
+.btn:active { transform: scale(0.98); }
+.btn:hover { background: #d63a2a; }
+.btn-block { display: block; width: 100%; margin-top: 18px; }
+.btn-gray { background: #95a5a6; }
+.btn-gray:hover { background: #828f90; }
+.btn-line { background: #fff; color: #e74c3c; border: 1.5px solid #e74c3c; }
+.btn-line:hover { background: #fdecea; }
+
+/* ───── 메시지 ───── */
+.msg-error   { color: #e74c3c; font-size: 13px; margin: 10px 0; text-align: center; }
+.msg-success { color: #27ae60; font-size: 15px; margin: 14px 0; text-align: center; font-weight: 700; }
+.center-link { text-align: center; margin-top: 18px; font-size: 13px; color: #777; }
+.center-link a { color: #e74c3c; text-decoration: none; font-weight: 700; }
+
+/* ───── 인증 화면 (로그인/회원가입) ───── */
+.auth-page { padding: 30px 24px; }
+.auth-logo { text-align: center; margin: 24px 0 6px; }
+.auth-logo .emoji { font-size: 52px; }
+.auth-logo h1 { color: #e74c3c; font-size: 30px; margin-top: 6px; }
+.auth-logo .subtitle { color: #999; font-size: 13px; margin-top: 4px; }
+
+/* ───── 메뉴 그리드 (대시보드) ───── */
+.menu-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+.feature {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    text-align: center;
+    text-decoration: none;
+    color: #333;
+    border: 2px solid transparent;
+    transition: transform 0.1s;
+}
+.feature:active { transform: scale(0.97); }
+.feature .icon { font-size: 34px; }
+.feature .title { font-weight: 700; font-size: 14px; margin-top: 8px; }
+.feature .desc { font-size: 11px; color: #999; margin-top: 3px; }
+.feature.soon { opacity: 0.45; }
+
+/* ───── 환영 배너 ───── */
+.welcome {
+    background: linear-gradient(135deg, #e74c3c, #ff6b52);
+    color: #fff;
+    border-radius: 18px;
+    padding: 22px 20px;
+    margin-bottom: 18px;
+}
+.welcome .hi { font-size: 21px; font-weight: 800; }
+.welcome .sub { font-size: 13px; opacity: 0.92; margin-top: 4px; }
+.role-badge {
+    background: rgba(255,255,255,0.25);
+    padding: 2px 9px; border-radius: 10px;
+    font-size: 11px; font-weight: 700; margin-left: 6px;
+}
+
+/* ───── 테이블 ───── */
+table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; }
+th { background: #e74c3c; color: #fff; padding: 10px 8px; text-align: center; font-size: 12px; }
+td { padding: 10px 8px; border-bottom: 1px solid #f0f0f0; font-size: 13px; text-align: center; }
+tr:last-child td { border-bottom: none; }
+
+/* ───── 운동 화면 (Rep 카운터) ───── */
+.rep-num { font-size: 64px; font-weight: 800; color: #e74c3c; text-align: center; margin: 4px 0; }
+.rom-slider { width: 100%; margin: 12px 0; accent-color: #e74c3c; }
+.rom-display { font-size: 18px; font-weight: 800; color: #2c3e50; text-align: center; }
+.pull-btn {
+    background: #e74c3c; color: #fff; border: none; width: 100%;
+    padding: 20px; font-size: 20px; font-weight: 800; border-radius: 14px;
+    cursor: pointer; margin: 14px 0;
+}
+.pull-btn:active { transform: scale(0.98); background: #c0392b; }
+.rep-msg { font-size: 14px; font-weight: 700; min-height: 22px; text-align: center; margin: 4px 0; }
+.btn-group { display: flex; gap: 10px; margin-top: 14px; }
+.btn-group form { flex: 1; }
+.btn-group .btn { width: 100%; }
+
+.big-emoji { font-size: 52px; text-align: center; }
+.text-center { text-align: center; }
+.muted { color: #999; font-size: 12px; }
+
+/* ───── 진행률 바 ───── */
+.progress {
+    width: 100%; height: 14px;
+    background: #eee; border-radius: 8px;
+    overflow: hidden; margin: 6px 0 4px;
+}
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #e74c3c, #ff6b52);
+    border-radius: 8px;
+    transition: width 0.4s;
+}
+
+/* ───── 루틴 운동 아이템 ───── */
+.routine-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 0; border-bottom: 1px solid #f0f0f0;
+}
+.routine-item:last-child { border-bottom: none; }
+.routine-item .ri-name { font-weight: 700; font-size: 14px; }
+.routine-item .ri-sub { font-size: 12px; color: #999; margin-top: 2px; }
+.ri-done-btn {
+    background: #e74c3c; color: #fff; border: none;
+    padding: 8px 14px; border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer;
+}
+.ri-done-btn:active { transform: scale(0.96); }
+.ri-check { color: #27ae60; font-size: 22px; font-weight: 800; }
+
+/* ───── 쿠폰 카드 ───── */
+.coupon {
+    background: #fff;
+    border: 2px dashed #e74c3c;
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.coupon.used { border-color: #ccc; opacity: 0.55; }
+.coupon .c-partner { font-weight: 800; font-size: 16px; color: #2c3e50; }
+.coupon .c-cat { font-size: 11px; color: #999; margin-top: 2px; }
+.coupon .c-code {
+    font-family: monospace; font-size: 13px; color: #e74c3c;
+    background: #fdecea; padding: 3px 8px; border-radius: 6px; margin-top: 6px; display: inline-block;
+}
+.coupon .c-discount { font-size: 22px; font-weight: 800; color: #e74c3c; }
+.coupon.new { border-color: #f39c12; box-shadow: 0 0 0 3px rgba(243,156,18,0.2); }
+
+/* ───── 축하 배너 ───── */
+.celebrate {
+    background: linear-gradient(135deg, #f39c12, #ff6b52);
+    color: #fff; border-radius: 18px; padding: 24px 20px;
+    text-align: center; margin-bottom: 18px;
+}
+.celebrate .c-emoji { font-size: 48px; }
+.celebrate .c-title { font-size: 20px; font-weight: 800; margin-top: 6px; }
+.celebrate .c-sub { font-size: 13px; opacity: 0.95; margin-top: 4px; }
+
+/* ═══════════════════════════════════════════════
+   관리자 콘솔 (PC용 데스크탑 레이아웃)
+   ═══════════════════════════════════════════════ */
+body.admin {
+    display: block;            /* 폰 가운데 정렬 해제 */
+    background: #eef0f3;
+    padding: 0;
+}
+.admin-top {
+    background: #2c3e50;
+    color: #fff;
+    padding: 14px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.admin-top .admin-logo { font-size: 19px; font-weight: 800; }
+.admin-top a { color: #cfd8e3; text-decoration: none; margin-left: 16px; font-size: 14px; }
+.admin-top a:hover { color: #fff; }
+
+.admin-nav {
+    background: #34495e;
+    padding: 0 28px;
+    display: flex; gap: 4px;
+}
+.admin-nav a {
+    color: #b8c4d0; text-decoration: none;
+    padding: 14px 20px; font-size: 14px; font-weight: 600;
+    border-bottom: 3px solid transparent;
+}
+.admin-nav a:hover { color: #fff; }
+.admin-nav a.active { color: #fff; border-bottom-color: #e74c3c; }
+
+.admin-content { max-width: 1000px; margin: 28px auto; padding: 0 20px; }
+
+.admin-card {
+    background: #fff; border-radius: 12px; padding: 24px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06); margin-bottom: 22px;
+}
+.admin-card h2 {
+    font-size: 17px; color: #2c3e50; margin-bottom: 16px;
+    border-left: 4px solid #e74c3c; padding-left: 10px;
+}
+
+/* 통계 카드 그리드 */
+.stat-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
+.stat-box {
+    background: #fff; border-radius: 12px; padding: 20px; text-align: center;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+}
+.stat-box .num { font-size: 30px; font-weight: 800; color: #e74c3c; }
+.stat-box .lbl { font-size: 13px; color: #777; margin-top: 4px; }
+
+/* 관리자 테이블 */
+.admin-table { width: 100%; border-collapse: collapse; }
+.admin-table th {
+    background: #f4f6f8; color: #2c3e50; padding: 12px 10px;
+    text-align: left; font-size: 13px; border-bottom: 2px solid #e3e8ec;
+}
+.admin-table td { padding: 11px 10px; border-bottom: 1px solid #eef1f4; font-size: 14px; }
+.admin-table tr:hover td { background: #fafbfc; }
+
+/* 관리자 작은 버튼 */
+.btn-sm {
+    display: inline-block; padding: 6px 12px; border-radius: 7px;
+    font-size: 13px; font-weight: 600; text-decoration: none; border: none; cursor: pointer;
+}
+.btn-edit   { background: #3498db; color: #fff; }
+.btn-del    { background: #e74c3c; color: #fff; }
+.btn-role   { background: #95a5a6; color: #fff; }
+.btn-sm:hover { opacity: 0.88; }
+
+/* 관리자 폼 (인라인 등록) */
+.admin-form { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+.admin-form .fld { display: flex; flex-direction: column; }
+.admin-form .fld label { margin: 0 0 4px; font-size: 12px; color: #666; }
+.admin-form input, .admin-form select {
+    padding: 9px 11px; border: 1px solid #d8dde2; border-radius: 8px; font-size: 14px; background: #fff;
+}
+.role-tag { padding: 2px 9px; border-radius: 10px; font-size: 12px; font-weight: 700; }
+.role-tag.admin { background: #fdecea; color: #e74c3c; }
+.role-tag.user  { background: #eef1f4; color: #777; }
+
+/* ───── 실제 폰에서 접속 시: 프레임 제거 ───── */
+@media (max-width: 440px) {
+    body { padding: 0; background: #f4f5f7; }
+    .phone-frame { width: 100%; height: 100vh; border-radius: 0; padding: 0; box-shadow: none; }
+    .phone-screen { border-radius: 0; }
+    .punch-hole { display: none; }
+}

@@ -1,0 +1,25 @@
+# ── DB 파일 (서버에서 init_db()로 새로 생성되므로 올리지 않음) ──
+*.db
+
+# ── 파이썬 캐시 ──
+__pycache__/
+*.pyc
+*.pyo
+
+# ── 가상환경 ──
+.venv/
+venv/
+env/
+
+# ── 에디터/IDE 설정 ──
+.idea/
+.vscode/
+.claude/
+
+# ── OS 생성 파일 ──
+.DS_Store
+Thumbs.db
+
+# ── 로그/임시 ──
+*.log
+server.log

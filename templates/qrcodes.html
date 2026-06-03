@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}FitQR - 기구 QR{% endblock %}
+
+{% block content %}
+<div class="app-header">
+    <span><a href="/machines/" class="h-back">←</a><span class="h-title">기구 QR 코드</span></span>
+</div>
+
+<div class="page">
+    <div class="card-tip">
+        🖨 이 QR을 출력해서 기구에 붙이거나, 화면에 띄워두고
+        <b>스캔 페이지(웹캠)</b>로 찍으면 해당 기구 운동 화면으로 이동해요.
+    </div>
+
+    {% for m in machines %}
+    <div class="card text-center">
+        <div style="font-weight:800; font-size:16px; margin-bottom:8px;">
+            🏋️ {{ m[1] }} <span class="muted">({{ m[2] }})</span>
+        </div>
+        <img src="/machine/{{ m[0] }}/qr.png" alt="{{ m[1] }} QR"
+             style="width:160px; height:160px; border:1px solid #eee; border-radius:8px;">
+        <div class="muted" style="margin-top:6px;">기구 #{{ m[0] }}</div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

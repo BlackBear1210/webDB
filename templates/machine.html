@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}FitQR - {{ m[1] }}{% endblock %}
+
+{% block content %}
+<div class="app-header">
+    <span><a href="/machines/" class="h-back">←</a><span class="h-title">{{ m[1] }}</span></span>
+</div>
+
+<div class="page">
+    <div class="card text-center">
+        <div style="font-size:13px; color:#e74c3c; font-weight:800;">📱 QR 스캔 완료</div>
+        <div style="font-size:44px; margin:10px 0;">🏋️</div>
+        <h1 style="font-size:24px; margin-bottom:6px;">{{ m[1] }}</h1>
+        <p class="muted">운동 부위: <b>{{ m[2] }}</b></p>
+        <p style="color:#666; font-size:13px; margin-top:8px;">{{ m[4] }}</p>
+        <p style="color:#e67e22; font-size:12px; margin-top:8px;">
+            ⚠️ 최소 가동범위 <b>{{ m[3] }}cm</b> 이상 당겨야 카운트됩니다.
+        </p>
+    </div>
+
+    <div class="card">
+        <h2 class="section-title">무게 설정</h2>
+        <form method="post" action="/machine/{{ m[0] }}/start/">
+            <div class="row2">
+                <div>
+                    <label>무게 (kg)</label>
+                    <input type="number" name="weight" id="weight" value="20" min="0">
+                </div>
+                <div>
+                    <label>목표 세트</label>
+                    <input type="number" name="target_sets" id="target_sets" value="3" min="1">
+                </div>
+            </div>
+            <input type="button" value="운동 시작 ▶" class="btn btn-block" onclick="
+                if(document.getElementById('weight').value==''){
+                    alert('무게를 입력해주세요.');
+                } else {
+                    document.querySelector('form').submit();
+                }
+            ">
+        </form>
+    </div>
+</div>
+{% endblock %}
