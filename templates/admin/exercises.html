@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% set show_nav = False %}
+{% block title %}운동종목 관리{% endblock %}
+{% block topright %}<a href="/" class="link">앱으로 →</a>{% endblock %}
+{% block content %}
+<div class="adminbar">
+  <a href="/admin/">대시보드</a>
+  <a class="on" href="/admin/exercises/">운동종목</a>
+  <a href="/admin/coupons/">쿠폰</a>
+  <a href="/admin/users/">회원</a>
+</div>
+
+<div class="card">
+  <div class="sec-title">운동 종목 추가</div>
+  <form method="post" action="/admin/exercises/add/">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <label class="fl" style="margin-top:0">이름</label>
+    <input name="name" required>
+    <div class="row">
+      <div class="grow">
+        <label class="fl">부위</label>
+        <select name="body_part">{% for b in body_parts %}<option>{{ b }}</option>{% endfor %}</select>
+      </div>
+      <div class="grow">
+        <label class="fl">난이도</label>
+        <select name="difficulty">{% for l in levels %}<option>{{ l }}</option>{% endfor %}</select>
+      </div>
+      <div class="grow">
+        <label class="fl">유형</label>
+        <select name="is_machine"><option value="1">머신</option><option value="0">거울</option></select>
+      </div>
+    </div>
+    <label class="fl">주 타겟 / 서브 타겟 / 장비</label>
+    <input name="primary_target" placeholder="주 타겟">
+    <input name="secondary_target" placeholder="서브 타겟" class="mt">
+    <input name="equipment" placeholder="장비" class="mt">
+    <label class="fl">준비 / 수행 / 팁</label>
+    <textarea name="prep" placeholder="준비 단계"></textarea>
+    <textarea name="execution" placeholder="수행 단계" class="mt"></textarea>
+    <textarea name="tips" placeholder="팁" class="mt"></textarea>
+    <button class="btn mt" type="submit">추가</button>
+  </form>
+</div>
+
+<div class="card">
+  <div class="sec-title">종목 목록 ({{ rows|length }})</div>
+  <table class="tb">
+    <tr><th>이름</th><th>부위</th><th>유형</th><th></th></tr>
+    {% for e in rows %}
+    <tr>
+      <td>{{ e[1] }}</td>
+      <td>{{ e[2] }}</td>
+      <td>{{ '머신' if e[6] else '거울' }}</td>
+      <td><form method="post" action="/admin/exercises/{{ e[0] }}/delete/">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <button class="btn sm ghost" type="submit">삭제</button></form></td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

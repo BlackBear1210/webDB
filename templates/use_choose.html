@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% set show_nav = False %}
+{% block title %}운동 시작 방법{% endblock %}
+{% block topright %}<a href="/workout/{{ wid }}/" class="link">← 운동</a>{% endblock %}
+{% block content %}
+
+<div class="card">
+  <div class="row">
+    <div class="ic" style="width:54px;height:54px;font-size:26px;flex-shrink:0">{{ '🏋️' if e[3] else '🪞' }}</div>
+    <div class="grow">
+      <div class="sec-title" style="margin:0">{{ e[1] }}</div>
+      <div class="mt"><span class="pill blue">{{ e[2] }}</span>
+        {% if e[3] %}<span class="pill machine">머신·QR</span>{% else %}<span class="pill mirror">거울·QR</span>{% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card center">
+  <div class="sec-title">📷 QR 스캔으로 시작</div>
+  {% if e[3] %}
+  <p class="muted small">머신의 QR을 스캔하면 센서가 reps·세트·휴식을 자동으로 기록합니다.<br>운동한 내역이 정확히 남습니다. (권장)</p>
+  {% else %}
+  <p class="muted small">전신거울의 QR을 스캔하면 카메라 동작 인식이 reps·세트·휴식을 자동으로 기록합니다.<br>운동한 내역이 정확히 남습니다. (권장)</p>
+  {% endif %}
+  <a href="/scan/"><button class="btn" style="font-size:17px">📷 QR 스캔하기</button></a>
+</div>
+
+<div class="card center">
+  <div class="sec-title">✍️ 수동으로 시작</div>
+  <p class="muted small">QR이 훼손돼 인식이 안 될 때 사용하세요.<br>무게·횟수를 직접 입력하고, 한 세트가 끝나면 <b>세트 종료</b>를 직접 누릅니다.</p>
+  <form method="post" action="/use/start/">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <input type="hidden" name="exercise_id" value="{{ e[0] }}">
+    <input type="hidden" name="workout_id" value="{{ wid }}">
+    <input type="hidden" name="mode" value="manual">
+    <button class="btn sec" type="submit">✍️ 수동으로 시작하기</button>
+  </form>
+</div>
+
+{% endblock %}

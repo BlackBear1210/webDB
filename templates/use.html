@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% set show_nav = False %}
+{% block title %}{{ use[6] }}{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="between">
+    <div>
+      <div class="sec-title" style="margin:0">{{ use[6] }}</div>
+      <div class="muted small mt">
+        {% if mode == 'demo' %}<span class="pill machine">발표용 자동입력</span>
+        {% elif mode == 'manual' %}<span class="pill mirror">수동 기록</span>
+        {% elif use[7] %}<span class="pill machine">머신 센서</span>
+        {% else %}<span class="pill mirror">거울 동작 인식</span>{% endif %}
+        목표 {{ target_sets }}세트 × {{ target_reps }}회
+      </div>
+    </div>
+    <a href="/exercise/{{ use[2] }}/" class="link">정보</a>
+  </div>
+</div>
+
+<div class="card">
+  <label class="fl" style="margin-top:0">무게 (kg) — 직접 입력</label>
+  <input id="weight" type="number" step="0.5" value="{{ use[3]|int if use[3] else '' }}" placeholder="예: 40">
+</div>
+
+{% if mode == 'demo' %}
+<!-- 발표용: 사전입력된 세트가 자동으로 채워짐 -->
+<div class="card" style="background:rgba(52,199,89,.1);border:1px solid rgba(52,199,89,.3)">
+  <div class="sec-title" style="margin:0">📋 발표용 자동 입력 완료</div>
+  <p class="muted small mt">아래 세트가 자동으로 기록되었습니다.<br><b>사용 종료</b>(다음 머신) 또는 <b>운동 종료</b>를 누르세요.</p>
+</div>
+
+{% elif mode == 'manual' %}
+<!-- 수동: 무게/횟수 직접 입력, 한 세트 끝나면 직접 종료 (자동 휴식 없음) -->
+<div class="card">
+  <div class="muted small center mb">QR 인식 없이 수동 기록 중 — 한 세트가 끝나면 직접 종료하세요</div>
+  <label class="fl" style="margin-top:0">이번 세트 횟수 (reps)</label>
+  <div class="row">
+    <input id="mreps" type="number" placeholder="예: 12">
+    <button class="btn good" type="button" onclick="manualAdd()">✅ 세트 종료</button>
+  </div>
+  <div class="muted small mt">무게는 위 칸 값으로 함께 기록됩니다. 세트마다 무게가 다르면 위 무게를 바꾼 뒤 종료하세요.</div>
+</div>
+
+{% else %}
+<!-- auto(QR): +1 Rep 자동 카운트 + 휴식 N초 무동작 시 세트 자동완료 -->
+<div class="card">
+  <div class="muted small center">현재 <b id="setNum">1</b>세트 진행 중</div>
+  <div class="counter">
+    <div class="reps" id="reps">0</div>
+    <div class="lab">감지된 횟수 (reps)</div>
+  </div>
+  <div class="center" id="reststate" style="height:22px"></div>
+  <button class="btn good" onclick="addRep()">+1 Rep (센서 감지)</button>
+  <div class="btnrow mt">
+    <button class="btn sec" onclick="finalizeSet(true)">이 세트 완료</button>
+    <button class="btn ghost" onclick="toggleManual()">직접 입력</button>
+  </div>
+  <div id="manual" class="card2 mt" style="display:none">
+    <label class="fl" style="margin-top:0">세트 추가 — 횟수</label>
+    <div class="row">
+      <input id="mreps" type="number" placeholder="예: 12">
+      <button class="btn sm" onclick="manualAdd()">추가</button>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div class="card">
+  <div class="sec-title">기록된 세트</div>
+  <div id="setlist"><div class="muted small">아직 완료된 세트가 없습니다.</div></div>
+</div>
+
+<form method="post" action="/use/{{ use[0] }}/end/" id="endform">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <input type="hidden" name="weight" id="fweight">
+  <input type="hidden" name="sets_json" id="fsets">
+  <input type="hidden" name="then_end" id="fthen" value="0">
+  <div class="btnrow">
+    <button class="btn sec" type="button" onclick="endUse(false)">사용 종료<br><span style="font-size:11px;font-weight:400">다음 머신 스캔</span></button>
+    <button class="btn bad" type="button" onclick="document.getElementById('m').classList.add('on')">운동 종료<br><span style="font-size:11px;font-weight:400">전체 기록 저장</span></button>
+  </div>
+</form>
+
+<div class="modal-bg" id="m">
+  <div class="modal">
+    <h3>운동을 종료할까요?</h3>
+    <p class="muted small mb">현재 종목을 저장하고 운동 전체를 종료합니다.</p>
+    <button class="btn bad" onclick="endUse(true)">네, 종료합니다</button>
+    <button class="btn ghost mt" onclick="document.getElementById('m').classList.remove('on')">취소</button>
+  </div>
+</div>
+
+<script>
+var MODE = "{{ mode }}";
+var REST = {{ rest_sec }};
+var DEMO_SETS = {{ demo_sets }};
+var DEMO_REPS = {{ demo_reps }};
+var DEMO_WEIGHT = {{ demo_weight }};
+
+var sets = [];          // [{reps, weight}]
+var curReps = 0;
+var setNum = 1;
+var restTimer = null;
+var restLeft = 0;
+
+function curWeight(){ return parseFloat(document.getElementById('weight').value) || 0; }
+
+function render(){
+  var repsEl = document.getElementById('reps');
+  if(repsEl) repsEl.textContent = curReps;
+  var snEl = document.getElementById('setNum');
+  if(snEl) snEl.textContent = setNum;
+  var box = document.getElementById('setlist');
+  if(sets.length===0){ box.innerHTML='<div class="muted small">아직 완료된 세트가 없습니다.</div>'; return; }
+  box.innerHTML = sets.map(function(s,i){
+    return '<div class="setline"><span>'+(i+1)+'세트</span><span><b>'+s.reps+'</b>회 · '+s.weight+'kg</span></div>';
+  }).join('');
+}
+
+// ── auto(QR) 전용 ──
+function startRest(){
+  clearInterval(restTimer);
+  restLeft = REST;
+  var el = document.getElementById('reststate');
+  if(!el) return;
+  el.innerHTML = '<span class="rest">휴식 '+restLeft+'초 후 세트 자동 완료</span>';
+  restTimer = setInterval(function(){
+    restLeft--;
+    if(restLeft<=0){ clearInterval(restTimer); el.innerHTML=''; finalizeSet(false); }
+    else el.innerHTML = '<span class="rest">휴식 '+restLeft+'초 후 세트 자동 완료</span>';
+  },1000);
+}
+function addRep(){ curReps++; render(); startRest(); }
+function finalizeSet(manual){
+  clearInterval(restTimer);
+  var rs = document.getElementById('reststate');
+  if(rs) rs.innerHTML='';
+  if(curReps>0){
+    sets.push({reps:curReps, weight:curWeight()});
+    curReps=0; setNum=sets.length+1; render();
+    if(!manual && rs){
+      rs.innerHTML='<span class="muted small">세트 완료! 다시 움직이면 다음 세트가 시작됩니다.</span>';
+    }
+  }
+}
+function toggleManual(){
+  var m=document.getElementById('manual');
+  if(m) m.style.display = m.style.display==='none' ? 'block' : 'none';
+}
+
+// ── manual / auto 공통: 한 세트 직접 기록 ──
+function manualAdd(){
+  var el=document.getElementById('mreps');
+  var r=parseInt(el.value);
+  if(r>0){
+    sets.push({reps:r, weight:curWeight()});
+    setNum=sets.length+1; render();
+    el.value='';
+  } else {
+    el.focus();
+  }
+}
+
+function endUse(thenEnd){
+  finalizeSet(true);     // 진행 중(auto) 세트 마무리
+  document.getElementById('fweight').value = curWeight();
+  document.getElementById('fsets').value = JSON.stringify(sets);
+  document.getElementById('fthen').value = thenEnd ? '1' : '0';
+  document.getElementById('endform').submit();
+}
+
+// 발표용 demo 모드: 사전입력 세트 자동 채움
+if(MODE==='demo' && DEMO_SETS>0){
+  document.getElementById('weight').value = DEMO_WEIGHT;
+  for(var i=0;i<DEMO_SETS;i++) sets.push({reps:DEMO_REPS, weight:DEMO_WEIGHT});
+}
+render();
+</script>
+{% endblock %}

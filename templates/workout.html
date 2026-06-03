@@ -1,76 +1,71 @@
-{% extends 'base.html' %}
-{% block title %}FitQR - 운동 중{% endblock %}
-
+{% extends "base.html" %}
+{% set show_nav = False %}
+{% block title %}운동 중{% endblock %}
 {% block content %}
-<div class="app-header">
-    <span class="h-title">💪 {{ ws[8] }}</span>
-    <span class="h-act">{{ ws[3] }}kg · {{ next_set }}/{{ ws[4] }}세트</span>
+<div class="card">
+  <div class="between">
+    <div>
+      <div class="sec-title" style="margin:0">{{ w[5] }}</div>
+      <div class="muted small mt">{{ w[2] }} 운동 · 진행 중</div>
+    </div>
+    <div class="center">
+      <div class="bignum" id="elapsed">00:00</div>
+      <div class="muted small">경과</div>
+    </div>
+  </div>
 </div>
 
-<div class="page">
-    <!-- Rep 카운터 (센서 시뮬레이션) -->
-    <div class="card">
-        <p class="muted text-center">이번 세트 카운트</p>
-        <div class="rep-num" id="repCount">0</div>
-
-        <p class="muted text-center">
-            당긴 가동범위 (최소 <b style="color:#e67e22;">{{ ws[10] }}cm</b> 이상이어야 카운트)
-        </p>
-        <input type="range" min="0" max="40" value="25" class="rom-slider"
-               id="rom" oninput="updateRom(this.value)">
-        <div class="rom-display"><span id="romVal">25</span> cm</div>
-
-        <button class="pull-btn" onclick="doRep()">💪 당기기 (Rep)</button>
-        <div class="rep-msg" id="repMsg"></div>
-
-        <div class="btn-group">
-            <form method="post" action="/workout/{{ ws[0] }}/set/" id="setForm">
-                <input type="hidden" name="reps" id="reps" value="0">
-                <button type="submit" class="btn">세트 완료 💾</button>
-            </form>
-            <form method="post" action="/workout/{{ ws[0] }}/end/">
-                <button type="submit" class="btn btn-gray">종목 종료 ⏹</button>
-            </form>
-        </div>
-    </div>
-
-    {% if sets %}
-    <div class="card">
-        <h2 class="section-title">완료한 세트</h2>
-        <table>
-            <tr><th>세트</th><th>무게</th><th>횟수</th><th>판정</th></tr>
-            {% for s in sets %}
-            <tr>
-                <td>{{ s[2] }}세트</td>
-                <td>{{ s[4] }}kg</td>
-                <td>{{ s[3] }}회</td>
-                <td>{% if s[5] == 1 %}✅{% else %}❌{% endif %}</td>
-            </tr>
-            {% endfor %}
-        </table>
-    </div>
-    {% endif %}
+{% if planned %}
+<div class="sec-title">계획된 종목</div>
+{% for p in planned %}
+{% set done = p[0] in uses|map(attribute=0)|list %}
+<div class="item">
+  <div class="ic">{{ '🏋️' if p[3] else '🪞' }}</div>
+  <div class="meta">
+    <div class="nm">{{ p[1] }}</div>
+    <div class="sub">{{ p[2] }} · 목표 {{ p[4] }}세트 × {{ p[5] }}회</div>
+  </div>
+  <a class="btn sm" href="/use/choose/{{ p[0] }}/?wid={{ w[0] }}">시작</a>
 </div>
-{% endblock %}
+{% endfor %}
+{% endif %}
 
-{% block script %}
+{% if uses %}
+<div class="sec-title mt">완료한 종목</div>
+{% for u in uses %}
+<div class="item">
+  <div class="ic">{{ '🏋️' if u[2] else '🪞' }}</div>
+  <div class="meta">
+    <div class="nm">{{ u[1] }}{% if not u[4] %} <span class="pill mirror">진행중</span>{% endif %}</div>
+    <div class="sub">{{ u[5] }}세트 · 총 {{ u[6] }}회 · {{ u[3]|int }}kg</div>
+  </div>
+  {% if not u[4] %}<a class="btn sm sec" href="/use/{{ u[0] }}/">이어서</a>{% endif %}
+</div>
+{% endfor %}
+{% endif %}
+
+<a href="/exercises/"><button class="btn sec mt">+ 다른 종목 추가</button></a>
+<button class="btn bad mt" onclick="document.getElementById('m').classList.add('on')">운동 종료</button>
+
+<div class="modal-bg" id="m">
+  <div class="modal">
+    <h3>운동을 종료할까요?</h3>
+    <p class="muted small mb">종료하면 기록이 저장되고 리포트에 반영됩니다.</p>
+    <form method="post" action="/workout/{{ w[0] }}/end/">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <button class="btn bad" type="submit">네, 종료합니다</button>
+    </form>
+    <button class="btn ghost mt" onclick="document.getElementById('m').classList.remove('on')">취소</button>
+  </div>
+</div>
+
 <script>
-    const MIN_ROM = {{ ws[10] }};
-    let reps = 0;
-    function updateRom(v){ document.getElementById('romVal').innerText = v; }
-    function doRep(){
-        const rom = parseInt(document.getElementById('rom').value);
-        const msg = document.getElementById('repMsg');
-        if(rom >= MIN_ROM){
-            reps++;
-            document.getElementById('repCount').innerText = reps;
-            document.getElementById('reps').value = reps;
-            msg.style.color = '#27ae60';
-            msg.innerText = '✅ 카운트! (' + rom + 'cm)';
-        } else {
-            msg.style.color = '#e74c3c';
-            msg.innerText = '❌ 가동범위 부족 (' + rom + ' < ' + MIN_ROM + 'cm)';
-        }
-    }
+var start = new Date("{{ w[6] }}".replace(' ','T'));
+setInterval(function(){
+  var s = Math.max(0, Math.floor((Date.now()-start.getTime())/1000));
+  var mm = String(Math.floor(s/60)).padStart(2,'0');
+  var ss = String(s%60).padStart(2,'0');
+  document.getElementById('elapsed').textContent = mm+':'+ss;
+}, 1000);
 </script>
 {% endblock %}

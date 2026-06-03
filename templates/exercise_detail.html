@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}종목 정보{% endblock %}
+{% block topright %}<a href="javascript:history.back()" class="link">← 뒤로</a>{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="row">
+    <div class="ic" style="width:54px;height:54px;font-size:26px">{{ '🏋️' if e[6] else '🪞' }}</div>
+    <div class="grow">
+      <div class="sec-title" style="margin:0">{{ e[1] }}</div>
+      <div class="mt">
+        <span class="pill blue">{{ e[2] }}</span>
+        <span class="pill">{{ e[7] }}</span>
+        {% if e[6] %}<span class="pill machine">머신·QR</span>{% else %}<span class="pill mirror">거울 인식</span>{% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="between mb"><span class="muted small">주 타겟</span><b>{{ e[3] or '-' }}</b></div>
+  <div class="between mb"><span class="muted small">서브 타겟</span><b>{{ e[4] or '-' }}</b></div>
+  <div class="between"><span class="muted small">필요 장비</span><b>{{ e[5] or '-' }}</b></div>
+</div>
+
+<div class="card">
+  <div class="sec-title">📹 운동 영상</div>
+  <div class="card2 center muted small" style="padding:30px">영상은 추후 제공됩니다</div>
+</div>
+
+<div class="card">
+  <div class="sec-title">① 준비 단계</div>
+  <p class="small" style="line-height:1.6">{{ e[8] or '-' }}</p>
+</div>
+<div class="card">
+  <div class="sec-title">② 수행 단계</div>
+  <p class="small" style="line-height:1.6">{{ e[9] or '-' }}</p>
+</div>
+<div class="card">
+  <div class="sec-title">💡 팁</div>
+  <p class="small" style="line-height:1.6">{{ e[10] or '-' }}</p>
+</div>
+
+{% if e[6] %}
+<a href="/machine/{{ e[0] }}/"><button class="btn sec mb">QR 스캔 화면 보기</button></a>
+{% endif %}
+
+<form method="post" action="/use/start/">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <input type="hidden" name="exercise_id" value="{{ e[0] }}">
+  {% if active_workout %}<input type="hidden" name="workout_id" value="{{ active_workout }}">{% endif %}
+  <button class="btn" type="submit">{{ '이 종목으로 운동 시작' }}</button>
+</form>
+{% endblock %}

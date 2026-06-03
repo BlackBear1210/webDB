@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}리포트{% endblock %}
+{% block content %}
+
+<!-- 총 통계 -->
+<div class="statgrid mb">
+  <div class="stat"><div class="v">{{ total_workouts }}</div><div class="k">총 운동</div></div>
+  <div class="stat"><div class="v">{{ total_min }}</div><div class="k">시간(분)</div></div>
+  <div class="stat"><div class="v">{{ total_volume }}</div><div class="k">볼륨(kg)</div></div>
+</div>
+
+<!-- 캘린더 -->
+<div class="card">
+  <div class="between mb">
+    <a href="/report/?ym={{ prev_ym }}" class="link">‹</a>
+    <b>{{ y }}년 {{ m }}월</b>
+    <a href="/report/?ym={{ next_ym }}" class="link">›</a>
+  </div>
+  <table class="cal">
+    <tr>{% for w in weekdays %}<th>{{ w }}</th>{% endfor %}</tr>
+    {% for week in weeks %}
+    <tr>
+      {% for day in week %}
+        {% if day == 0 %}
+          <td></td>
+        {% else %}
+          {% set ds = '%04d-%02d-%02d'|format(y, m, day) %}
+          {% set has = ds in workout_dates %}
+          <td class="{{ 'has' if has }} {{ 'today' if ds==today }}">
+            {% if has %}
+              <a href="/report/day/{{ ds }}/"><div class="d">{{ day }}</div><div class="dot"></div></a>
+            {% else %}
+              <div class="d">{{ day }}</div>
+            {% endif %}
+          </td>
+        {% endif %}
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </table>
+  <p class="muted small center mt">점이 있는 날 = 운동한 날 (터치해서 상세 보기)</p>
+</div>
+
+<!-- 부위 히트맵 -->
+<div class="card">
+  <div class="sec-title">트레이닝 주기 (최근 7일)</div>
+  {% for b in body_parts %}
+  <div class="heatrow">
+    <span class="hn">{{ b }}</span>
+    <div class="heatbar"><i style="width:{{ (heat.get(b,0)/heat_max*100)|round if heat_max else 0 }}%"></i></div>
+  </div>
+  {% endfor %}
+  {% if not heat_max %}<p class="muted small mt">이번 주 운동 기록이 아직 없습니다.</p>{% endif %}
+</div>
+
+<!-- 내 무게 -->
+<div class="card">
+  <div class="between mb">
+    <div class="sec-title" style="margin:0">내 무게</div>
+    <span class="bignum">{{ cur_weight|int if cur_weight else '-' }}<span class="muted small">kg</span></span>
+  </div>
+  {% if chart %}
+  <svg viewBox="0 0 {{ chart.W }} {{ chart.H }}" style="width:100%;height:120px">
+    <polyline fill="none" stroke="#3b6cf6" stroke-width="2" points="{{ chart.points }}"/>
+    {% for d in chart.dots %}<circle cx="{{ d[0] }}" cy="{{ d[1] }}" r="2.5" fill="#7aa0ff"/>{% endfor %}
+  </svg>
+  <div class="between muted small"><span>{{ chart.first }}</span><span>{{ chart.last }}</span></div>
+  {% else %}
+  <p class="muted small">기록된 체중이 없습니다.</p>
+  {% endif %}
+  <form method="post" action="/report/weight/" class="row mt">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <input name="weight" type="number" step="0.1" placeholder="오늘 체중(kg)" class="grow">
+    <button class="btn sm" type="submit">기록</button>
+  </form>
+</div>
+
+<!-- 최근 기록 -->
+<div class="sec-title">기록</div>
+{% for r in recent %}
+<a href="/report/day/{{ r[2][:10] }}/" class="item">
+  <div class="ic">📋</div>
+  <div class="meta">
+    <div class="nm">{{ r[1] }}</div>
+    <div class="sub">{{ r[2] }} · {{ (r[3]//60) }}분 · 볼륨 {{ r[4]|int }}kg</div>
+  </div>
+  <span class="muted">›</span>
+</a>
+{% else %}
+<div class="card center muted">완료한 운동이 없습니다.</div>
+{% endfor %}
+{% endblock %}

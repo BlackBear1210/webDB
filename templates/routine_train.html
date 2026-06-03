@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}루틴{% endblock %}
+{% block content %}
+<div class="subtabs">
+  <a class="subtab" href="/">계획</a>
+  <a class="subtab on" href="/routine/exercises/">훈련</a>
+</div>
+
+<p class="muted small mb">이번 30일 루틴에 포함된 모든 운동 종목입니다.</p>
+
+{% for part, items in groups.items() %}
+<div class="sec-title">{{ part }}</div>
+{% for e in items %}
+<a href="/exercise/{{ e[0] }}/" class="item">
+  <div class="ic">{{ '🏋️' if e[3] else '🪞' }}</div>
+  <div class="meta">
+    <div class="nm">{{ e[1] }}</div>
+    <div class="sub">{{ e[4] }} ·
+      {% if e[3] %}<span class="pill machine">머신·QR</span>{% else %}<span class="pill mirror">거울 인식</span>{% endif %}
+    </div>
+  </div>
+  <span class="muted">›</span>
+</a>
+{% endfor %}
+{% else %}
+<div class="card center muted">루틴 종목이 없습니다.</div>
+{% endfor %}
+{% endblock %}

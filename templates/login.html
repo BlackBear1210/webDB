@@ -1,37 +1,23 @@
-{% extends 'base.html' %}
-{% block title %}FitQR - 로그인{% endblock %}
-
+{% extends "base.html" %}
+{% set show_nav = False %}
+{% block header %}{% endblock %}
 {% block content %}
-<div class="auth-page">
-    <div class="auth-logo">
-        <div class="emoji">🏋️</div>
-        <h1>FitQR</h1>
-        <p class="subtitle">스마트 짐 운동 트래커</p>
-    </div>
+<div class="auth">
+  <h1>FitQR</h1>
+  <div class="tagline">QR 찍고 — 운동을 기록하다</div>
 
-    {% if error %}
-        <p class="msg-error">{{ error }}</p>
-    {% endif %}
+  {% if error %}<div class="error">{{ error }}</div>{% endif %}
 
-    <form method="post">
-        <label>아이디</label>
-        <input type="text" name="login_id" id="login_id" placeholder="아이디 입력">
+  <form method="post">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <label class="fl">아이디</label>
+    <input name="login_id" placeholder="아이디" autocomplete="username">
+    <label class="fl">비밀번호</label>
+    <input name="password" type="password" placeholder="비밀번호" autocomplete="current-password">
+    <button class="btn mt" type="submit">로그인</button>
+  </form>
 
-        <label>비밀번호</label>
-        <input type="password" name="password" id="password" placeholder="비밀번호 입력">
-
-        <input type="button" value="로그인" class="btn btn-block" onclick="
-            if(document.getElementById('login_id').value==''
-            || document.getElementById('password').value==''){
-                alert('아이디와 비밀번호를 입력해주세요.');
-            } else {
-                document.querySelector('form').submit();
-            }
-        ">
-    </form>
-
-    <p class="center-link">
-        계정이 없나요? <a href="/register/">회원가입</a>
-    </p>
+  <a href="/register/"><button class="btn ghost mt">회원가입</button></a>
+  <p class="muted small center mt">관리자 데모 계정 · admin / 1234</p>
 </div>
 {% endblock %}

@@ -1,40 +1,32 @@
-{% extends 'admin/admin_base.html' %}
-{% block title %}FitQR 관리자 - 회원관리{% endblock %}
-
+{% extends "base.html" %}
+{% set show_nav = False %}
+{% block title %}회원 관리{% endblock %}
+{% block topright %}<a href="/" class="link">앱으로 →</a>{% endblock %}
 {% block content %}
-<h1 style="font-size:22px; color:#2c3e50; margin-bottom:20px;">👥 회원 관리</h1>
+<div class="adminbar">
+  <a href="/admin/">대시보드</a>
+  <a href="/admin/exercises/">운동종목</a>
+  <a href="/admin/coupons/">쿠폰</a>
+  <a class="on" href="/admin/users/">회원</a>
+</div>
 
-<div class="admin-card">
-    <h2>전체 회원 ({{ users|length }}명)</h2>
-    <table class="admin-table">
-        <tr>
-            <th>번호</th><th>아이디</th><th>이름</th><th>성별</th>
-            <th>나이</th><th>키/몸무게</th><th>권한</th><th>관리</th>
-        </tr>
-        {% for u in users %}
-        <tr>
-            <td>{{ u[0] }}</td>
-            <td>{{ u[1] }}</td>
-            <td>{{ u[3] }}</td>
-            <td>{{ u[4] }}</td>
-            <td>{{ u[5] }}</td>
-            <td>{{ u[6]|int }}cm / {{ u[7]|int }}kg</td>
-            <td>
-                <span class="role-tag {{ u[8] }}">{{ u[8] }}</span>
-            </td>
-            <td>
-                {% if u[0] == session['user_id'] %}
-                    <span style="color:#aaa; font-size:13px;">(본인)</span>
-                {% else %}
-                    <a href="/admin/users/{{ u[0] }}/role/" class="btn-sm btn-role">
-                        {% if u[8] == 'admin' %}관리자해제{% else %}관리자승급{% endif %}
-                    </a>
-                    <a href="/admin/users/{{ u[0] }}/delete/" class="btn-sm btn-del"
-                       onclick="return confirm('정말 삭제할까요?');">삭제</a>
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
+<div class="card">
+  <div class="sec-title">회원 목록 ({{ users|length }})</div>
+  <table class="tb">
+    <tr><th>ID</th><th>이름</th><th>목표</th><th>레벨</th><th>권한</th><th></th></tr>
+    {% for u in users %}
+    <tr>
+      <td>{{ u[1] }}</td><td>{{ u[2] }}</td><td>{{ u[4] }}</td><td>{{ u[5] }}</td>
+      <td>{{ u[6] }}</td>
+      <td>
+        {% if u[6] != 'admin' %}
+        <form method="post" action="/admin/users/{{ u[0] }}/delete/">
+          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+          <button class="btn sm ghost" type="submit">삭제</button></form>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
 </div>
 {% endblock %}

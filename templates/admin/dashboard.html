@@ -1,31 +1,31 @@
-{% extends 'admin/admin_base.html' %}
-{% block title %}FitQR 관리자 - 통계{% endblock %}
-
+{% extends "base.html" %}
+{% set show_nav = False %}
+{% block title %}관리자{% endblock %}
+{% block topright %}<a href="/" class="link">앱으로 →</a>{% endblock %}
 {% block content %}
-<h1 style="font-size:22px; color:#2c3e50; margin-bottom:20px;">📊 통계 대시보드</h1>
-
-<!-- 핵심 지표 -->
-<div class="stat-grid">
-    <div class="stat-box"><div class="num">{{ user_count }}</div><div class="lbl">전체 회원</div></div>
-    <div class="stat-box"><div class="num">{{ machine_count }}</div><div class="lbl">운동 기구</div></div>
-    <div class="stat-box"><div class="num">{{ session_count }}</div><div class="lbl">운동 세션</div></div>
-    <div class="stat-box"><div class="num">{{ routine_count }}</div><div class="lbl">추천 루틴</div></div>
-    <div class="stat-box"><div class="num">{{ coupon_count }}</div><div class="lbl">지급 쿠폰</div></div>
+<div class="adminbar">
+  <a class="on" href="/admin/">대시보드</a>
+  <a href="/admin/exercises/">운동종목</a>
+  <a href="/admin/coupons/">쿠폰</a>
+  <a href="/admin/users/">회원</a>
 </div>
 
-<!-- 인기 기구 -->
-<div class="admin-card" style="margin-top:22px;">
-    <h2>🔥 인기 기구 TOP 5 (운동 횟수)</h2>
-    <table class="admin-table">
-        <tr><th>순위</th><th>기구명</th><th>부위</th><th>운동 횟수</th></tr>
-        {% for m in popular %}
-        <tr>
-            <td>{{ loop.index }}위</td>
-            <td>{{ m[0] }}</td>
-            <td>{{ m[1] }}</td>
-            <td>{{ m[2] }}회</td>
-        </tr>
-        {% endfor %}
-    </table>
+<div class="statgrid mb">
+  <div class="stat"><div class="v">{{ uc }}</div><div class="k">회원</div></div>
+  <div class="stat"><div class="v">{{ ec }}</div><div class="k">운동종목</div></div>
+  <div class="stat"><div class="v">{{ wc }}</div><div class="k">완료 운동</div></div>
+</div>
+<div class="statgrid mb">
+  <div class="stat"><div class="v">{{ cc }}</div><div class="k">지급 쿠폰</div></div>
+</div>
+
+<div class="card">
+  <div class="sec-title">인기 종목 TOP 5</div>
+  <table class="tb">
+    <tr><th>종목</th><th>부위</th><th>사용</th></tr>
+    {% for p in popular %}
+    <tr><td>{{ p[0] }}</td><td>{{ p[1] }}</td><td>{{ p[2] }}</td></tr>
+    {% endfor %}
+  </table>
 </div>
 {% endblock %}

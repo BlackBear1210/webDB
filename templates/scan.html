@@ -1,81 +1,174 @@
-{% extends 'base.html' %}
-{% block title %}FitQR - QR 스캔{% endblock %}
-
-{% block head %}
-<script src="/static/html5-qrcode.min.js"></script>
-<style>
-    #reader { width: 100%; border-radius: 14px; overflow: hidden; }
-    #reader video { border-radius: 14px; }
-    .scan-status { text-align:center; font-size:14px; font-weight:700; margin-top:12px; min-height:22px; }
-</style>
+{% extends "base.html" %}
+{% set show_nav = False %}
+{% block title %}QR 스캔{% endblock %}
+{% block topright %}
+  {% if wid %}<a href="/workout/{{ wid }}/" class="link">현황 보기</a>{% else %}<a href="/qrcodes/" class="link">← QR 목록</a>{% endif %}
 {% endblock %}
-
 {% block content %}
-<div class="app-header">
-    <span><a href="/machines/" class="h-back">←</a><span class="h-title">📷 QR 스캔</span></span>
+
+<!-- 현재 운동 상태 -->
+{% if wid %}
+<div class="card" style="background:rgba(59,108,246,.13);border:1px solid rgba(59,108,246,.3)">
+  <div class="between">
+    <div>
+      <div style="font-weight:800">🏋️ {{ workout_title }}</div>
+      <div class="muted small mt">머신 {{ done_count }}개 완료 · 운동 진행 중</div>
+    </div>
+    <span class="pill blue">진행중</span>
+  </div>
+</div>
+{% else %}
+<div class="card center muted small">
+  루틴에서 시작하거나 QR 스캔 시 자동으로 운동이 시작됩니다.
+</div>
+{% endif %}
+
+<div class="card center">
+  <div class="sec-title">📷 머신 QR 스캔</div>
+  <p class="muted small">머신에 붙은 QR을 카메라에 비춰주세요.<br>인식되면 해당 머신 화면으로 자동 이동합니다.</p>
 </div>
 
-<div class="page">
-    <div class="card-tip">
-        💡 기구의 <b>QR을 카메라에 비추면</b> 자동으로 운동 화면으로 이동해요.
-        (노트북 웹캠 사용 — 카메라 권한을 허용해주세요)
-    </div>
-
-    <div class="card">
-        <div id="reader"></div>
-        <div class="scan-status" id="status" style="color:#888;">카메라 준비 중...</div>
-    </div>
-
-    <a href="/qrcodes/" class="btn btn-line btn-block">📄 기구 QR 코드 보기</a>
-    <a href="/machines/" class="btn btn-gray btn-block">기구 목록에서 직접 선택</a>
+<!-- 카메라 뷰파인더 -->
+<div style="position:relative;border-radius:16px;overflow:hidden;background:#000;margin-bottom:14px">
+  <div id="reader" style="width:100%"></div>
+  <div style="position:absolute;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center">
+    <div style="width:200px;height:200px;border:3px solid #3b6cf6;border-radius:12px;
+                box-shadow:0 0 0 9999px rgba(0,0,0,.5)"></div>
+  </div>
 </div>
-{% endblock %}
 
-{% block script %}
+<div class="card2 center" id="status">
+  <span class="muted small">카메라 초기화 중...</span>
+</div>
+
+{% if wid %}
+<button class="btn bad mt" onclick="document.getElementById('em').classList.add('on')">운동 종료</button>
+<div class="modal-bg" id="em">
+  <div class="modal">
+    <h3>운동을 종료할까요?</h3>
+    <p class="muted small mb">지금까지 완료한 머신들이 모두 저장됩니다.</p>
+    <form method="post" action="/workout/{{ wid }}/end/">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <button class="btn bad" type="submit">네, 종료합니다</button>
+    </form>
+    <button class="btn ghost mt" onclick="document.getElementById('em').classList.remove('on')">취소</button>
+  </div>
+</div>
+{% endif %}
+
+<script src="{{ url_for('static', filename='html5-qrcode.min.js') }}"></script>
 <script>
-    const statusEl = document.getElementById('status');
-    let scanner = null;
-    let handled = false;
+var WID = "{{ wid }}";
+var scanned = false;
+var statusEl = document.getElementById('status');
+var html5Qr = new Html5Qrcode('reader', { verbose: false });
 
-    // 스캔 성공 처리: 디코딩된 문자열에서 기구 번호 추출
-    function onScanSuccess(decodedText) {
-        if (handled) return;               // 중복 이동 방지
-        const m = decodedText.match(/machine\/(\d+)/);   // .../machine/3/ → 3
-        if (m) {
-            handled = true;
-            statusEl.style.color = '#27ae60';
-            statusEl.innerText = '✅ 인식 완료! 이동 중...';
-            if (scanner) { scanner.stop().catch(()=>{}); }
-            // 현재 주소(origin) 기준으로 이동 → 로컬/배포 자동 대응
-            window.location.href = '/machine/' + m[1] + '/';
-        } else {
-            statusEl.style.color = '#e74c3c';
-            statusEl.innerText = '❌ FitQR 기구 QR이 아닙니다: ' + decodedText;
-        }
-    }
+function setStatus(html) { statusEl.innerHTML = html; }
 
-    // 카메라 시작
-    Html5Qrcode.getCameras().then(cameras => {
-        if (cameras && cameras.length) {
-            scanner = new Html5Qrcode("reader");
-            scanner.start(
-                cameras[0].id,
-                { fps: 10, qrbox: 220 },
-                onScanSuccess,
-                () => {}                    // 프레임마다 실패하는 건 무시
-            ).then(() => {
-                statusEl.innerText = 'QR을 카메라에 비춰주세요';
-            }).catch(err => {
-                statusEl.style.color = '#e74c3c';
-                statusEl.innerText = '⚠️ 카메라를 시작할 수 없어요: ' + err;
-            });
-        } else {
-            statusEl.style.color = '#e74c3c';
-            statusEl.innerText = '⚠️ 사용 가능한 카메라가 없습니다.';
-        }
-    }).catch(err => {
-        statusEl.style.color = '#e74c3c';
-        statusEl.innerText = '⚠️ 카메라 권한을 허용해주세요.';
-    });
+function onScanSuccess(decodedText) {
+  if (scanned) return;
+
+  // 보안: QR 내용에서 머신 번호(/machine/<숫자>/)만 추출해 '내부 경로'로만 이동.
+  //  - 임의 URL/`javascript:` 스킴으로의 이동(오픈 리다이렉트·DOM XSS) 차단.
+  //  - 패턴이 없으면 이동하지 않고 계속 스캔.
+  var match = decodedText.match(/\/machine\/(\d+)\/?/);
+  if (!match) {
+    setStatus('<span class="muted small">⚠️ 유효한 머신 QR이 아닙니다. 머신 QR을 비춰주세요.</span>');
+    return;   // scanned 를 세우지 않아 계속 스캔
+  }
+
+  scanned = true;
+  setStatus('<span style="color:var(--good);font-weight:800">✅ QR 인식됨!</span>');
+
+  // 숫자 id로만 내부 상대경로 구성 (외부 도메인/스킴 개입 불가)
+  // scanned=1 : 실제 QR 스캔으로 진입했음을 머신 페이지에 알림
+  var url = '/machine/' + encodeURIComponent(match[1]) + '/?scanned=1';
+
+  // 발표용 QR이면 사전입력 값(sets/reps/weight)을 '숫자만' 안전하게 추출해 전달
+  var sm = decodedText.match(/[?&]sets=(\d+)/);
+  var rm = decodedText.match(/[?&]reps=(\d+)/);
+  var wm = decodedText.match(/[?&]weight=(\d+(?:\.\d+)?)/);
+  if (sm && rm) {
+    url += '&sets=' + sm[1] + '&reps=' + rm[1];
+    if (wm) url += '&weight=' + wm[1];
+  }
+
+  if (WID) url += '&wid=' + encodeURIComponent(WID);
+
+  html5Qr.stop().catch(function(){}).then(function(){
+    setTimeout(function(){ window.location.href = url; }, 300);
+  });
+}
+
+var config = {
+  fps: 10,
+  qrbox: { width: 220, height: 220 },
+  aspectRatio: 1.0
+};
+
+// 후면 카메라 우선으로 즉시 시작 (실패 시 카메라 목록에서 선택)
+function startCamera() {
+  setStatus('<span class="muted small">카메라 권한을 허용해주세요...</span>');
+  html5Qr.start(
+    { facingMode: 'environment' },
+    config,
+    onScanSuccess,
+    function () {}  // 프레임마다 호출되는 실패 콜백 (무시)
+  ).then(function () {
+    setStatus('<span class="muted small">🔍 QR 코드를 찾는 중...</span>');
+  }).catch(function (err) {
+    // facingMode가 안 되면 사용 가능한 카메라 중 하나로 재시도
+    Html5Qrcode.getCameras().then(function (cameras) {
+      if (cameras && cameras.length) {
+        var camId = cameras[cameras.length - 1].id; // 보통 마지막이 후면
+        html5Qr.start(camId, config, onScanSuccess, function () {})
+          .then(function () {
+            setStatus('<span class="muted small">🔍 QR 코드를 찾는 중...</span>');
+          })
+          .catch(showCamError);
+      } else {
+        showCamError('카메라를 찾을 수 없습니다.');
+      }
+    }).catch(showCamError);
+  });
+}
+
+function showCamError(err) {
+  var msg = (err && err.message) ? err.message : (err || '카메라를 사용할 수 없습니다.');
+  setStatus(
+    '<span style="color:var(--bad);font-weight:700">⚠️ 카메라를 켤 수 없어요</span>' +
+    '<div class="muted small mt">' + msg + '</div>' +
+    '<div class="muted small mt">· 브라우저의 카메라 권한을 허용했는지 확인하세요.<br>' +
+    '· 카메라는 <b>https</b> 또는 <b>localhost</b>에서만 작동합니다.</div>' +
+    '<button class="btn mt" onclick="startCamera()">다시 시도</button>'
+  );
+}
+
+if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+  showCamError('이 브라우저/환경에서는 카메라(getUserMedia)를 지원하지 않습니다.');
+} else {
+  startCamera();
+}
 </script>
+
+<style>
+#reader { border: none !important; }
+#reader__scan_region { border-radius: 12px; }
+#reader__dashboard {
+  background: var(--card) !important;
+  border-radius: 0 0 12px 12px;
+  padding: 10px !important;
+}
+#reader__dashboard_section_csr button {
+  background: var(--blue) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 10px !important;
+  padding: 10px 18px !important;
+  font-weight: 700 !important;
+}
+#reader__dashboard_section_swaplink { color: var(--blue2) !important; }
+#reader__status_span { color: var(--sub) !important; font-size: 12px !important; }
+#reader__header_message { display: none !important; }
+</style>
 {% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}운동{% endblock %}
+{% block topright %}
+  <a href="/qrcodes/" class="link">QR 목록</a>
+{% endblock %}
+{% block content %}
+
+<!-- QR 스캔 / 모음 바로가기 -->
+<div class="btnrow mb">
+  <a href="/scan/" style="flex:1"><button class="btn sec" style="width:100%">📷 QR 스캔</button></a>
+  <a href="/qrcodes/" style="flex:1"><button class="btn sec" style="width:100%">🗂️ QR 모음</button></a>
+</div>
+
+<form method="get" action="/exercises/">
+  <input name="q" value="{{ q }}" placeholder="🔍 운동 이름 검색">
+  <input type="hidden" name="bp" value="{{ bp }}">
+  <input type="hidden" name="mc" value="{{ mc }}">
+</form>
+
+<div class="chips mt mb">
+  <a class="chip {{ 'on' if not bp }}" href="/exercises/?mc={{ mc }}">전체</a>
+  {% for b in body_parts %}
+  <a class="chip {{ 'on' if bp==b }}" href="/exercises/?bp={{ b }}&mc={{ mc }}&q={{ q }}">{{ b }}</a>
+  {% endfor %}
+</div>
+<div class="chips mb">
+  <a class="chip {{ 'on' if mc=='' }}" href="/exercises/?bp={{ bp }}&q={{ q }}">머신+거울</a>
+  <a class="chip {{ 'on' if mc=='1' }}" href="/exercises/?bp={{ bp }}&mc=1&q={{ q }}">🏋️ 머신</a>
+  <a class="chip {{ 'on' if mc=='0' }}" href="/exercises/?bp={{ bp }}&mc=0&q={{ q }}">🪞 거울</a>
+</div>
+
+<p class="muted small mb">{{ rows|length }}개 종목</p>
+{% for e in rows %}
+<a href="/exercise/{{ e[0] }}/" class="item">
+  <div class="ic">{{ '🏋️' if e[5] else '🪞' }}</div>
+  <div class="meta">
+    <div class="nm">{{ e[1] }}</div>
+    <div class="sub">{{ e[2] }} · {{ e[3] }} · {{ e[4] }}</div>
+  </div>
+  <span class="pill">{{ e[6] }}</span>
+</a>
+{% else %}
+<div class="card center muted">검색 결과가 없습니다.</div>
+{% endfor %}
+{% endblock %}

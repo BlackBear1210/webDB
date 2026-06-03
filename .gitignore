@@ -1,6 +1,9 @@
 # ── DB 파일 (서버에서 init_db()로 새로 생성되므로 올리지 않음) ──
 *.db
 
+# ── 세션 서명용 비밀키 (자동 생성, 절대 깃에 올리지 않음) ──
+.secret_key
+
 # ── 파이썬 캐시 ──
 __pycache__/
 *.pyc
@@ -23,3 +26,23 @@ Thumbs.db
 # ── 로그/임시 ──
 *.log
 server.log
+
+# ── Node.js (PPT 생성용, 배포 불필요) ──
+node_modules/
+package.json
+package-lock.json
+make_pptx.js
+
+# ── 발표 자료 (배포 불필요) ──
+*.pptx
+~$*.pptx
+
+# ── 루트에 생성된 QR 이미지 (demoqr/ 안은 유지) ──
+가슴_*.png
+다리_*.png
+등_*.png
+복근_*.png
+어깨_*.png
+엉덩이_*.png
+전신_*.png
+팔_*.png

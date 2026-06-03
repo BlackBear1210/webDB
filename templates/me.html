@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}내 정보{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="row">
+    <div class="ic" style="width:54px;height:54px;font-size:26px">👤</div>
+    <div class="grow">
+      <div class="sec-title" style="margin:0">{{ u[3] }}</div>
+      <div class="muted small">{{ u[1] }} · {{ u[4] }}</div>
+    </div>
+    {% if u[17]=='admin' %}<span class="pill blue">관리자</span>{% endif %}
+  </div>
+</div>
+
+<div class="card">
+  <div class="between mb"><span class="muted small">30일 루틴 진행률</span><b>{{ done }}/{{ total }}일 · {{ rate }}%</b></div>
+  <div class="prog"><i style="width:{{ rate }}%"></i></div>
+  <a href="/me/rewards/"><button class="btn sec mt">🎁 보상함 ({{ coupon_cnt }})</button></a>
+</div>
+
+<div class="card">
+  <div class="sec-title">가입 정보</div>
+  <div class="between mb"><span class="muted small">주된 목표</span><b>{{ u[5] }}</b></div>
+  <div class="between mb"><span class="muted small">집중 부위</span><b>{{ u[6].replace(',', ' · ') }}</b></div>
+  <div class="between mb"><span class="muted small">키 / 현재 체중</span><b>{{ u[7]|int }}cm / {{ u[8]|int }}kg</b></div>
+  <div class="between mb"><span class="muted small">목표 체중</span><b>{{ u[9]|int }}kg</b></div>
+  <div class="between mb"><span class="muted small">피트니스 레벨</span><b>{{ u[10] }}</b></div>
+  <div class="between mb"><span class="muted small">1RM (스/벤/데)</span><b>{{ u[11]|int }} / {{ u[12]|int }} / {{ u[13]|int }}</b></div>
+  <div class="between mb"><span class="muted small">운동 빈도</span><b>{{ '매일' if u[14]==7 else (u[14] ~ '일/주') }}</b></div>
+  <div class="between"><span class="muted small">시작 요일</span><b>{{ weekdays[u[15]] }}요일</b></div>
+</div>
+
+<a href="/me/edit/"><button class="btn sec">정보 수정</button></a>
+{% if u[17]=='admin' %}<a href="/admin/"><button class="btn sec mt">관리자 페이지</button></a>{% endif %}
+<a href="/logout/"><button class="btn ghost mt">로그아웃</button></a>
+{% endblock %}

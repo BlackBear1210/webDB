@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}보상함{% endblock %}
+{% block topright %}<a href="/me/" class="link">← 내 정보</a>{% endblock %}
+{% block content %}
+<p class="muted small mb">30일 루틴 95% 달성 시 제휴사 쿠폰이 지급됩니다.</p>
+{% for c in coupons %}
+<div class="card">
+  <div class="between mb">
+    <b>{{ c[1] }}</b>
+    <span class="pill {{ 'green' if c[2]=='프로틴' else 'blue' }}">{{ c[2] }}</span>
+  </div>
+  <div class="bignum">{{ c[4] }}</div>
+  <div class="card2 mt center" style="letter-spacing:2px;font-weight:800">{{ c[3] }}</div>
+  <div class="muted small mt">{{ c[5] }} 발급{% if c[6] %} · 사용완료{% endif %}</div>
+</div>
+{% else %}
+<div class="card center muted">아직 받은 쿠폰이 없습니다.<br>루틴을 95% 이상 완료해보세요!</div>
+{% endfor %}
+{% endblock %}

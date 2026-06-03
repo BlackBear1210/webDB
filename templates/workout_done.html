@@ -1,42 +1,46 @@
-{% extends 'base.html' %}
-{% block title %}FitQR - 운동 완료{% endblock %}
-
+{% extends "base.html" %}
+{% set show_nav = False %}
+{% block title %}운동 완료{% endblock %}
 {% block content %}
-<div class="app-header">
-    <span class="h-title">운동 완료</span>
-    <a href="/" class="h-act">메인</a>
+{% if new_reward %}
+<div class="card" style="background:linear-gradient(135deg,#3b6cf6,#7a4dff)">
+  <div class="sec-title" style="margin:0">🎁 축하합니다!</div>
+  <p class="small mt">30일 루틴 95%를 달성해 제휴사 할인 쿠폰이 발급되었습니다.</p>
+  <a href="/me/rewards/"><button class="btn sec mt">보상함에서 확인</button></a>
+</div>
+{% endif %}
+
+<div class="card center">
+  <div style="font-size:46px">✅</div>
+  <div class="sec-title" style="margin:6px 0">{{ w[5] }} 완료</div>
+  <div class="muted small">{{ w[7] }}</div>
 </div>
 
-<div class="page">
-    <div class="card text-center">
-        <div class="big-emoji">✅</div>
-        <h1 style="font-size:23px; margin:8px 0;">{{ ws[8] }} 완료!</h1>
-        <p class="muted">
-            <b style="color:#e74c3c;">{{ ws[3] }}kg</b> ·
-            <b style="color:#e74c3c;">{{ sets|length }}세트</b> ·
-            총 <b style="color:#e74c3c;">{{ total_reps }}회</b>
-        </p>
-        <p class="muted" style="margin-top:6px;">
-            {{ ws[5] }} ~ {{ ws[6] }}
-        </p>
-    </div>
-
-    <div class="card">
-        <h2 class="section-title">세트별 기록</h2>
-        <table>
-            <tr><th>세트</th><th>무게</th><th>횟수</th><th>판정</th></tr>
-            {% for s in sets %}
-            <tr>
-                <td>{{ s[2] }}세트</td>
-                <td>{{ s[4] }}kg</td>
-                <td>{{ s[3] }}회</td>
-                <td>{% if s[5] == 1 %}✅{% else %}❌{% endif %}</td>
-            </tr>
-            {% endfor %}
-        </table>
-    </div>
-
-    <a href="/machines/" class="btn btn-block">다음 기구 운동 ▶</a>
-    <a href="/" class="btn btn-gray btn-block">메인으로</a>
+<div class="statgrid mb">
+  <div class="stat"><div class="v">{{ (w[9]//60) }}:{{ '%02d'|format(w[9]%60) }}</div><div class="k">운동 시간</div></div>
+  <div class="stat"><div class="v">{{ w[10]|int }}</div><div class="k">총 볼륨(kg)</div></div>
+  <div class="stat"><div class="v">{{ uses|length }}</div><div class="k">종목 수</div></div>
 </div>
+
+<div class="sec-title">종목별 기록</div>
+{% for u in uses %}
+<div class="card">
+  <div class="between mb">
+    <b>{{ u.name }}</b>
+    <span class="muted small">{{ u.weight|int }}kg · 볼륨 {{ u.volume|int }}</span>
+  </div>
+  {% if u.sets %}
+    {% for s in u.sets %}
+    <div class="setline"><span>{{ s[0] }}세트</span><span><b>{{ s[1] }}</b>회 · {{ s[2]|int }}kg</span></div>
+    {% endfor %}
+  {% else %}
+    <div class="muted small">기록된 세트 없음</div>
+  {% endif %}
+</div>
+{% else %}
+<div class="card center muted">기록된 종목이 없습니다.</div>
+{% endfor %}
+
+<a href="/"><button class="btn mt">루틴으로 돌아가기</button></a>
+<a href="/report/"><button class="btn sec mt">리포트 보기</button></a>
 {% endblock %}

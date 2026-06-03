@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}{{ date_str }}{% endblock %}
+{% block topright %}<a href="/report/" class="link">← 리포트</a>{% endblock %}
+{% block content %}
+<div class="sec-title">{{ date_str }} 운동 기록</div>
+<p class="muted small mb">이 날 {{ workouts|length }}회 운동 (운동 종료 단위로 구분)</p>
+
+{% for blk in workouts %}
+{% set w = blk.w %}
+<div class="card">
+  <div class="between mb">
+    <div>
+      <b>{{ loop.index }}회차 · {{ w[1] }}</b>
+      <div class="muted small mt">{{ w[4] }} · {{ (w[5]//60) }}분 · 볼륨 {{ w[6]|int }}kg <span class="pill">{{ w[2] }}</span></div>
+    </div>
+  </div>
+  {% for u in blk.uses %}
+  <div class="card2 mb">
+    <div class="between mb"><b>{{ u.name }}</b><span class="muted small">{{ u.weight|int }}kg</span></div>
+    {% for s in u.sets %}
+    <div class="setline"><span>{{ s[0] }}세트</span><span><b>{{ s[1] }}</b>회 · {{ s[2]|int }}kg</span></div>
+    {% else %}
+    <div class="muted small">세트 기록 없음</div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card center muted">이 날의 운동 기록이 없습니다.</div>
+{% endfor %}
+{% endblock %}

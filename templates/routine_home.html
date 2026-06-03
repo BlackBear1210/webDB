@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}루틴{% endblock %}
+{% block content %}
+<div class="subtabs">
+  <a class="subtab on" href="/">계획</a>
+  <a class="subtab" href="/routine/exercises/">훈련</a>
+</div>
+
+<div class="card">
+  <div class="between mb">
+    <div class="sec-title" style="margin:0">30일 챌린지</div>
+    <span class="pill blue">{{ done }}/{{ total }}일 · {{ rate }}%</span>
+  </div>
+  <div class="prog"><i style="width:{{ rate }}%"></i></div>
+  <p class="muted small mt">앞 날을 완료하면 다음 날이 해금됩니다. 95% 달성 시 제휴 쿠폰 지급 🎁</p>
+</div>
+
+<div class="daygrid">
+  {% for d in days %}
+    {% set unlocked = d[4] %}
+    {% set done_ = d[5] %}
+    {% if unlocked %}
+    <a href="/routine/day/{{ d[1] }}/" class="daycard {{ 'done' if done_ }}">
+      <div class="mk">{{ '✓' if done_ else '' }}</div>
+      <div class="dn">{{ d[1] }}일</div>
+      <div class="wd">{{ weekdays[d[2]] }}요일</div>
+      <div class="bp">{{ d[3] }}</div>
+    </a>
+    {% else %}
+    <div class="daycard locked">
+      <div class="mk">🔒</div>
+      <div class="dn">{{ d[1] }}일</div>
+      <div class="wd">{{ weekdays[d[2]] }}요일</div>
+      <div class="bp">{{ d[3] }}</div>
+    </div>
+    {% endif %}
+  {% endfor %}
+</div>
+{% endblock %}

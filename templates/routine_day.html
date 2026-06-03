@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{{ rday[2] }}일차{% endblock %}
+{% block topright %}<a href="/" class="link">← 루틴</a>{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="between">
+    <div>
+      <div class="sec-title" style="margin:0">{{ rday[2] }}일차 · {{ weekdays[rday[3]] }}요일</div>
+      <div class="muted small mt">오늘의 부위 — <b style="color:var(--blue2)">{{ rday[5] }}</b></div>
+    </div>
+    {% if rday[7] %}<span class="pill green">완료 ✓</span>{% endif %}
+  </div>
+</div>
+
+<div class="sec-title">운동 종목 ({{ items|length }})</div>
+{% for it in items %}
+<a href="/exercise/{{ it[1] }}/" class="item">
+  <div class="ic">{{ '🏋️' if it[4] else '🪞' }}</div>
+  <div class="meta">
+    <div class="nm">{{ it[2] }}</div>
+    <div class="sub">{{ it[5] }} · {{ it[7] }}세트 × {{ it[8] }}회 ·
+      {% if it[4] %}<span class="pill machine">머신</span>{% else %}<span class="pill mirror">거울</span>{% endif %}
+    </div>
+  </div>
+  <span class="muted">›</span>
+</a>
+{% endfor %}
+
+<!-- 메인: QR 스캔으로 머신 연동 -->
+<form method="post" action="/routine/day/{{ rday[2] }}/scan/" class="mt">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <button class="btn" type="submit" style="font-size:17px">📷 QR 스캔하기</button>
+</form>
+<!-- 보조: 운동 진행 현황 확인 (선택) -->
+<form method="post" action="/routine/day/{{ rday[2] }}/start/" class="mt">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <button class="btn sec" type="submit">운동 현황 보기</button>
+</form>
+{% endblock %}

@@ -1,44 +1,82 @@
-{% extends 'base.html' %}
-{% block title %}FitQR - {{ m[1] }}{% endblock %}
-
+{% extends "base.html" %}
+{% set show_nav = False %}
+{% block title %}{{ 'QR 스캔됨' if scanned else ('머신 정보' if e[6] else '거울 종목 정보') }}{% endblock %}
+{% block topright %}
+  {% if scanned %}<a href="/scan/" class="link">← 스캔</a>{% else %}<a href="/exercises/" class="link">← 운동</a>{% endif %}
+{% endblock %}
 {% block content %}
-<div class="app-header">
-    <span><a href="/machines/" class="h-back">←</a><span class="h-title">{{ m[1] }}</span></span>
+
+{% if scanned %}
+<!-- 실제 QR 스캔으로 진입한 경우에만 인식 완료 배너 -->
+<div class="card" style="background:rgba(52,199,89,.12);border:1px solid rgba(52,199,89,.3)">
+  <div class="row">
+    <span style="font-size:28px">✅</span>
+    <div>
+      <div style="font-weight:800">QR 인식 완료</div>
+      <div class="muted small">아래 {{ '머신' if e[6] else '거울 종목' }} 정보를 확인하고 운동을 시작하세요</div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- 머신 정보 -->
+<div class="card">
+  <div class="row">
+    <div class="ic" style="width:54px;height:54px;font-size:26px;flex-shrink:0">{{ '🏋️' if e[6] else '🪞' }}</div>
+    <div class="grow">
+      <div class="sec-title" style="margin:0">{{ e[1] }}</div>
+      <div class="mt">
+        <span class="pill blue">{{ e[2] }}</span>
+        <span class="pill">{{ e[7] }}</span>
+        {% if e[6] %}<span class="pill machine">머신·QR</span>{% else %}<span class="pill mirror">거울·QR</span>{% endif %}
+      </div>
+    </div>
+  </div>
 </div>
 
-<div class="page">
-    <div class="card text-center">
-        <div style="font-size:13px; color:#e74c3c; font-weight:800;">📱 QR 스캔 완료</div>
-        <div style="font-size:44px; margin:10px 0;">🏋️</div>
-        <h1 style="font-size:24px; margin-bottom:6px;">{{ m[1] }}</h1>
-        <p class="muted">운동 부위: <b>{{ m[2] }}</b></p>
-        <p style="color:#666; font-size:13px; margin-top:8px;">{{ m[4] }}</p>
-        <p style="color:#e67e22; font-size:12px; margin-top:8px;">
-            ⚠️ 최소 가동범위 <b>{{ m[3] }}cm</b> 이상 당겨야 카운트됩니다.
-        </p>
-    </div>
-
-    <div class="card">
-        <h2 class="section-title">무게 설정</h2>
-        <form method="post" action="/machine/{{ m[0] }}/start/">
-            <div class="row2">
-                <div>
-                    <label>무게 (kg)</label>
-                    <input type="number" name="weight" id="weight" value="20" min="0">
-                </div>
-                <div>
-                    <label>목표 세트</label>
-                    <input type="number" name="target_sets" id="target_sets" value="3" min="1">
-                </div>
-            </div>
-            <input type="button" value="운동 시작 ▶" class="btn btn-block" onclick="
-                if(document.getElementById('weight').value==''){
-                    alert('무게를 입력해주세요.');
-                } else {
-                    document.querySelector('form').submit();
-                }
-            ">
-        </form>
-    </div>
+<div class="card">
+  <div class="between mb"><span class="muted small">주 타겟</span><b>{{ e[3] or '-' }}</b></div>
+  <div class="between mb"><span class="muted small">서브 타겟</span><b>{{ e[4] or '-' }}</b></div>
+  <div class="between"><span class="muted small">필요 장비</span><b>{{ e[5] or '-' }}</b></div>
 </div>
+
+<div class="card">
+  <div class="sec-title">📹 운동 영상</div>
+  <div class="card2 center muted small" style="padding:30px">영상은 추후 제공됩니다</div>
+</div>
+
+<div class="card">
+  <div class="sec-title">① 준비 단계</div>
+  <p class="small" style="line-height:1.7">{{ e[8] or '-' }}</p>
+</div>
+<div class="card">
+  <div class="sec-title">② 수행 단계</div>
+  <p class="small" style="line-height:1.7">{{ e[9] or '-' }}</p>
+</div>
+<div class="card">
+  <div class="sec-title">💡 팁</div>
+  <p class="small" style="line-height:1.7">{{ e[10] or '-' }}</p>
+</div>
+
+{% if d_sets and d_reps %}
+<!-- 발표용 QR: 사전입력 값 안내 -->
+<div class="card" style="background:rgba(59,108,246,.1);border:1px solid rgba(59,108,246,.3)">
+  <div class="muted small">📋 발표용 QR — 아래 값이 자동 입력됩니다</div>
+  <div style="font-weight:800;margin-top:4px">{{ d_sets }}세트 × {{ d_reps }}회 · {{ d_weight|int }}kg</div>
+</div>
+{% endif %}
+
+<!-- 운동 시작 버튼 -->
+<form method="post" action="/use/start/">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <input type="hidden" name="exercise_id" value="{{ e[0] }}">
+  {% if wid %}<input type="hidden" name="workout_id" value="{{ wid }}">{% endif %}
+  {% if d_sets and d_reps %}
+  <input type="hidden" name="sets" value="{{ d_sets }}">
+  <input type="hidden" name="reps" value="{{ d_reps }}">
+  <input type="hidden" name="weight" value="{{ d_weight }}">
+  {% endif %}
+  <button class="btn" type="submit" style="font-size:17px">{{ '이 머신으로' if e[6] else '이 종목으로' }} 운동 시작 →</button>
+</form>
+
 {% endblock %}

@@ -1,71 +1,112 @@
-{% extends 'base.html' %}
-{% block title %}FitQR - 회원가입{% endblock %}
-
+{% extends "base.html" %}
+{% set show_nav = False %}
+{% block header %}{% endblock %}
 {% block content %}
-<div class="auth-page">
-    <div class="auth-logo">
-        <div class="emoji">🏋️</div>
-        <h1>FitQR</h1>
-        <p class="subtitle">회원가입</p>
+<div class="auth">
+  <h1>회원가입</h1>
+  <div class="tagline">정보를 입력하면 30일 맞춤 루틴이 생성됩니다</div>
+
+  {% if error %}<div class="error">{{ error }}</div>{% endif %}
+
+  <form method="post" id="regform">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <label class="fl">아이디 *</label>
+    <input name="login_id" placeholder="아이디">
+    <label class="fl">비밀번호 *</label>
+    <input name="password" type="password" placeholder="비밀번호">
+    <label class="fl">이름 *</label>
+    <input name="name" placeholder="이름">
+
+    <label class="fl">성별</label>
+    <select name="gender">
+      <option value="남">남</option><option value="여">여</option>
+    </select>
+
+    <label class="fl">주된 목표</label>
+    <select name="goal">
+      {% for g in goals %}<option value="{{ g }}">{{ g }}</option>{% endfor %}
+    </select>
+
+    <label class="fl">집중 부위 (복수 선택 가능)</label>
+    <div class="chips" id="focusChips">
+      {% for b in body_parts %}
+      <label class="chip">
+        <input type="checkbox" name="focus_part" value="{{ b }}" hidden onchange="this.closest('.chip').classList.toggle('on', this.checked)">
+        {{ b }}
+      </label>
+      {% endfor %}
     </div>
 
-    {% if error %}
-        <p class="msg-error">{{ error }}</p>
-    {% endif %}
+    <label class="fl">키 (cm)</label>
+    <input name="height" type="number" step="0.1" placeholder="예: 175">
 
-    {% if success %}
-        <p class="msg-success">{{ success }}</p>
-        <a href="/login/" class="btn btn-block">로그인하러 가기</a>
-    {% else %}
-        <form method="post">
-            <label>아이디</label>
-            <input type="text" name="login_id" id="login_id" placeholder="아이디 입력">
+    <label class="fl">현재 체중 (kg)</label>
+    <input name="weight" id="cw" type="number" step="0.1" placeholder="예: 75" oninput="checkWeight()">
 
-            <label>비밀번호</label>
-            <input type="password" name="password" id="password" placeholder="비밀번호 입력">
+    <label class="fl">목표 체중 (kg)</label>
+    <input name="target_weight" id="tw" type="number" step="0.1" placeholder="예: 70" oninput="checkWeight()">
+    <div id="wmsg"></div>
 
-            <label>이름</label>
-            <input type="text" name="name" id="name" placeholder="이름 입력">
+    <label class="fl">피트니스 레벨</label>
+    <select name="fitness_level">
+      <option value="초급">초급 (6개월 미만)</option>
+      <option value="중급">중급 (6개월 ~ 2년)</option>
+      <option value="상급">상급 (2년 이상)</option>
+    </select>
 
-            <div class="row2">
-                <div>
-                    <label>성별</label>
-                    <select name="gender" id="gender">
-                        <option value="남">남</option>
-                        <option value="여">여</option>
-                    </select>
-                </div>
-                <div>
-                    <label>나이</label>
-                    <input type="number" name="age" id="age" placeholder="나이">
-                </div>
-            </div>
+    <label class="fl">1RM (모르면 비워두세요) — 스쿼트 / 벤치 / 데드리프트 (kg)</label>
+    <div class="row">
+      <input name="squat_1rm" type="number" step="0.5" placeholder="스쿼트">
+      <input name="bench_1rm" type="number" step="0.5" placeholder="벤치">
+      <input name="deadlift_1rm" type="number" step="0.5" placeholder="데드">
+    </div>
 
-            <div class="row2">
-                <div>
-                    <label>키 (cm)</label>
-                    <input type="number" name="height" id="height" placeholder="175">
-                </div>
-                <div>
-                    <label>몸무게 (kg)</label>
-                    <input type="number" name="weight" id="weight" placeholder="70">
-                </div>
-            </div>
+    <label class="fl">운동 빈도 (주당)</label>
+    <select name="frequency">
+      {% for n in [1,2,3,4,5,6,7] %}
+      <option value="{{ n }}"{{ ' selected' if n==3 }}>{{ '매일' if n==7 else (n ~ '일 / 주') }}</option>
+      {% endfor %}
+    </select>
 
-            <input type="button" value="가입하기" class="btn btn-block" onclick="
-                if(document.getElementById('login_id').value==''
-                || document.getElementById('password').value==''
-                || document.getElementById('name').value==''){
-                    alert('아이디 / 비밀번호 / 이름은 필수입니다.');
-                } else {
-                    document.querySelector('form').submit();
-                }
-            ">
-        </form>
+    <label class="fl">운동 시작 요일</label>
+    <select name="start_weekday">
+      {% for i in range(7) %}<option value="{{ i }}">{{ weekdays[i] }}요일</option>{% endfor %}
+    </select>
 
-        <p class="center-link">
-            이미 계정이 있나요? <a href="/login/">로그인</a>
-        </p>
-    {% endif %}
+    <button class="btn mt" type="submit">가입하고 시작하기</button>
+  </form>
+  <a href="/login/"><button class="btn ghost mt">로그인으로</button></a>
 </div>
+
+<script>
+function checkWeight(){
+  var cw = parseFloat(document.getElementById('cw').value);
+  var tw = parseFloat(document.getElementById('tw').value);
+  var box = document.getElementById('wmsg');
+  if(!cw || !tw){ box.innerHTML=''; return; }
+  var diff = (tw - cw) / cw * 100;
+  var d = Math.round(diff*10)/10;
+  var html='';
+  if(diff < 0){
+    if(diff <= -15){
+      html='<div class="notice bad">⚠️ 현재 체중 대비 '+(-d)+'% 감량 목표입니다. 단기간 과도한 감량은 '
+          +'근손실·면역저하·영양불균형 등 건강 문제를 일으킬 수 있어요. 단계적 목표를 권장합니다.</div>';
+    }else{
+      html='<div class="notice good">👍 '+(-d)+'% 감량 목표. 체지방이 줄면 관절 부담 감소, 심혈관 건강 개선, '
+          +'인슐린 민감도 향상 등의 장점이 있어요.</div>';
+    }
+  }else if(diff > 0){
+    if(diff >= 15){
+      html='<div class="notice bad">⚠️ 현재 체중 대비 '+d+'% 증량 목표입니다. 급격한 증량은 '
+          +'체지방 증가·심혈관 부담 등을 유발할 수 있어요. 근육 위주의 점진적 증량을 권장합니다.</div>';
+    }else{
+      html='<div class="notice good">💪 '+d+'% 증량 목표. 근육량이 늘면 기초대사량 증가, 근력·운동수행력 향상 '
+          +'등의 장점이 있어요.</div>';
+    }
+  }else{
+    html='<div class="notice">현재 체중을 유지하는 목표입니다.</div>';
+  }
+  box.innerHTML=html;
+}
+</script>
 {% endblock %}

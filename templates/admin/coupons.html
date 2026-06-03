@@ -1,63 +1,46 @@
-{% extends 'admin/admin_base.html' %}
-{% block title %}FitQR 관리자 - 쿠폰관리{% endblock %}
-
+{% extends "base.html" %}
+{% set show_nav = False %}
+{% block title %}쿠폰 관리{% endblock %}
+{% block topright %}<a href="/" class="link">앱으로 →</a>{% endblock %}
 {% block content %}
-<h1 style="font-size:22px; color:#2c3e50; margin-bottom:20px;">🎁 쿠폰 관리</h1>
-
-<!-- 쿠폰 등록 (CREATE) -->
-<div class="admin-card">
-    <h2>＋ 새 쿠폰 등록</h2>
-    <form method="post" action="/admin/coupons/add/" class="admin-form">
-        <div class="fld">
-            <label>제휴사</label>
-            <input type="text" name="partner_name" required placeholder="예: 마이프로틴">
-        </div>
-        <div class="fld">
-            <label>카테고리</label>
-            <select name="category">
-                <option value="프로틴">프로틴</option>
-                <option value="운동용품">운동용품</option>
-            </select>
-        </div>
-        <div class="fld">
-            <label>코드</label>
-            <input type="text" name="code" required placeholder="예: FITQR-XX10">
-        </div>
-        <div class="fld">
-            <label>할인</label>
-            <input type="text" name="discount" required placeholder="예: 10% 할인" style="width:120px;">
-        </div>
-        <div class="fld">
-            <label>재고</label>
-            <input type="number" name="total_qty" value="50" style="width:90px;">
-        </div>
-        <button type="submit" class="btn-sm btn-edit" style="padding:9px 16px;">등록</button>
-    </form>
+<div class="adminbar">
+  <a href="/admin/">대시보드</a>
+  <a href="/admin/exercises/">운동종목</a>
+  <a class="on" href="/admin/coupons/">쿠폰</a>
+  <a href="/admin/users/">회원</a>
 </div>
 
-<!-- 쿠폰 목록 (READ / DELETE) -->
-<div class="admin-card">
-    <h2>전체 쿠폰 ({{ coupons|length }}개)</h2>
-    <table class="admin-table">
-        <tr>
-            <th>번호</th><th>제휴사</th><th>카테고리</th><th>코드</th>
-            <th>할인</th><th>남은재고</th><th>지급됨</th><th>관리</th>
-        </tr>
-        {% for c in coupons %}
-        <tr>
-            <td>{{ c[0] }}</td>
-            <td>{{ c[1] }}</td>
-            <td>{{ c[2] }}</td>
-            <td style="font-family:monospace; color:#e74c3c;">{{ c[3] }}</td>
-            <td>{{ c[4] }}</td>
-            <td>{{ c[6] }}개</td>
-            <td>{{ c[7] }}회</td>
-            <td>
-                <a href="/admin/coupons/{{ c[0] }}/delete/" class="btn-sm btn-del"
-                   onclick="return confirm('정말 삭제할까요?');">삭제</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
+<div class="card">
+  <div class="sec-title">쿠폰 추가</div>
+  <form method="post" action="/admin/coupons/add/">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <label class="fl" style="margin-top:0">제휴사</label>
+    <input name="partner_name" required>
+    <div class="row">
+      <div class="grow"><label class="fl">분류</label>
+        <select name="category"><option>프로틴</option><option>운동장비</option></select></div>
+      <div class="grow"><label class="fl">재고</label>
+        <input name="total_qty" type="number" value="50"></div>
+    </div>
+    <label class="fl">코드 / 할인</label>
+    <input name="code" placeholder="FITQR-XXX">
+    <input name="discount" placeholder="10% 할인" class="mt">
+    <button class="btn mt" type="submit">추가</button>
+  </form>
+</div>
+
+<div class="card">
+  <div class="sec-title">쿠폰 목록</div>
+  <table class="tb">
+    <tr><th>제휴사</th><th>할인</th><th>재고</th><th>지급</th><th></th></tr>
+    {% for c in coupons %}
+    <tr>
+      <td>{{ c[1] }}</td><td>{{ c[4] }}</td><td>{{ c[6] }}</td><td>{{ c[7] }}</td>
+      <td><form method="post" action="/admin/coupons/{{ c[0] }}/delete/">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <button class="btn sm ghost" type="submit">삭제</button></form></td>
+    </tr>
+    {% endfor %}
+  </table>
 </div>
 {% endblock %}

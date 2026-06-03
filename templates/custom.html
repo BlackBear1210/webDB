@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}커스텀{% endblock %}
+{% block content %}
+
+<div class="card">
+  <div class="sec-title">새 커스텀 루틴</div>
+  <label class="fl" style="margin-top:0">루틴 이름</label>
+  <input id="rname" placeholder="예: 가슴+삼두 데이">
+
+  <label class="fl">종목 추가</label>
+  <div class="row">
+    <select id="exsel" class="grow">
+      {% for e in all_ex %}
+      <option value="{{ e[0] }}" data-name="{{ e[1] }}">{{ e[2] }} · {{ e[1] }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn sm" type="button" onclick="addEx()">담기</button>
+  </div>
+
+  <form method="post" action="/custom/create/" id="cform" class="mt">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <input type="hidden" name="name" id="fname">
+    <div id="picked"><div class="muted small">담은 종목이 여기에 표시됩니다.</div></div>
+    <button class="btn mt" type="button" onclick="saveCustom()">루틴 저장</button>
+  </form>
+</div>
+
+<div class="sec-title">내 커스텀 루틴</div>
+{% for r in routines %}
+<div class="card">
+  <div class="between mb">
+    <b>{{ r.name }}</b>
+    <form method="post" action="/custom/{{ r.id }}/delete/">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <button class="btn sm ghost" type="submit">삭제</button>
+    </form>
+  </div>
+  {% for it in r['exlist'] %}
+  <div class="setline"><span>{{ it[0] }}</span><span class="muted">{{ it[1] }}세트 × {{ it[2] }}회</span></div>
+  {% endfor %}
+  <form method="post" action="/custom/{{ r.id }}/start/" class="mt">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <button class="btn" type="submit">이 루틴으로 운동 시작</button>
+  </form>
+</div>
+{% else %}
+<div class="card center muted">아직 만든 커스텀 루틴이 없습니다.</div>
+{% endfor %}
+
+<script>
+var picked = [];
+function addEx(){
+  var sel = document.getElementById('exsel');
+  var opt = sel.options[sel.selectedIndex];
+  picked.push({id:opt.value, name:opt.dataset.name, sets:3, reps:12});
+  render();
+}
+function removeEx(i){ picked.splice(i,1); render(); }
+function render(){
+  var box=document.getElementById('picked');
+  if(picked.length===0){ box.innerHTML='<div class="muted small">담은 종목이 여기에 표시됩니다.</div>'; return; }
+  box.innerHTML = picked.map(function(p,i){
+    return '<div class="card2 mb"><div class="between mb"><b>'+p.name+'</b>'
+      +'<span class="muted small" onclick="removeEx('+i+')" style="cursor:pointer">✕ 빼기</span></div>'
+      +'<div class="row"><span class="muted small">세트</span>'
+      +'<input type="number" value="'+p.sets+'" onchange="picked['+i+'].sets=this.value">'
+      +'<span class="muted small">횟수</span>'
+      +'<input type="number" value="'+p.reps+'" onchange="picked['+i+'].reps=this.value"></div></div>';
+  }).join('');
+}
+function saveCustom(){
+  if(picked.length===0){ alert('종목을 1개 이상 담아주세요.'); return; }
+  document.getElementById('fname').value = document.getElementById('rname').value || '나의 커스텀 루틴';
+  var f=document.getElementById('cform');
+  picked.forEach(function(p){
+    ['id|exercise_id','sets|sets','reps|reps'].forEach(function(pair){
+      var k=pair.split('|'); var inp=document.createElement('input');
+      inp.type='hidden'; inp.name=k[1]; inp.value=p[k[0]]; f.appendChild(inp);
+    });
+  });
+  f.submit();
+}
+render();
+</script>
+{% endblock %}

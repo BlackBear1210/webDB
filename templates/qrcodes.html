@@ -1,26 +1,62 @@
-{% extends 'base.html' %}
-{% block title %}FitQR - 기구 QR{% endblock %}
-
+{% extends "base.html" %}
+{% block title %}QR 코드 모음{% endblock %}
+{% block topright %}
+  <a href="/scan/" class="link">📷 QR 스캔</a>
+{% endblock %}
 {% block content %}
-<div class="app-header">
-    <span><a href="/machines/" class="h-back">←</a><span class="h-title">기구 QR 코드</span></span>
+
+<p class="muted small mb">머신·전신거울 QR을 핸드폰에 저장하거나 출력해서 기기/거울에 부착하세요.</p>
+
+<!-- 종류 필터 -->
+<div class="chips mb">
+  <a class="chip {{ 'on' if not mc }}" href="/qrcodes/{{ '?bp=' ~ bp if bp }}">전체</a>
+  <a class="chip {{ 'on' if mc=='1' }}" href="/qrcodes/?mc=1{{ '&bp=' ~ bp if bp }}">🏋️ 머신</a>
+  <a class="chip {{ 'on' if mc=='0' }}" href="/qrcodes/?mc=0{{ '&bp=' ~ bp if bp }}">🪞 거울</a>
 </div>
 
-<div class="page">
-    <div class="card-tip">
-        🖨 이 QR을 출력해서 기구에 붙이거나, 화면에 띄워두고
-        <b>스캔 페이지(웹캠)</b>로 찍으면 해당 기구 운동 화면으로 이동해요.
-    </div>
-
-    {% for m in machines %}
-    <div class="card text-center">
-        <div style="font-weight:800; font-size:16px; margin-bottom:8px;">
-            🏋️ {{ m[1] }} <span class="muted">({{ m[2] }})</span>
-        </div>
-        <img src="/machine/{{ m[0] }}/qr.png" alt="{{ m[1] }} QR"
-             style="width:160px; height:160px; border:1px solid #eee; border-radius:8px;">
-        <div class="muted" style="margin-top:6px;">기구 #{{ m[0] }}</div>
-    </div>
-    {% endfor %}
+<!-- 부위 필터 -->
+<div class="chips mb">
+  <a class="chip {{ 'on' if not bp }}" href="/qrcodes/{{ '?mc=' ~ mc if mc }}">전체</a>
+  {% for b in body_parts %}
+  <a class="chip {{ 'on' if bp==b }}" href="/qrcodes/?bp={{ b }}{{ '&mc=' ~ mc if mc }}">{{ b }}</a>
+  {% endfor %}
 </div>
+
+<p class="muted small mb">{{ machines|length }}개 종목</p>
+
+{% set cur_part = '' %}
+{% for m in machines %}
+  {% if m[2] != cur_part %}
+    {% set cur_part = m[2] %}
+    <div class="sec-title">{{ m[2] }}</div>
+  {% endif %}
+
+  <div class="card" style="display:flex;align-items:center;gap:16px">
+    <!-- QR 이미지 -->
+    <a href="/machine/{{ m[0] }}/" style="flex-shrink:0">
+      <img src="/machine/{{ m[0] }}/qr.png"
+           alt="{{ m[1] }} QR"
+           style="width:110px;height:110px;border-radius:10px;background:#fff;padding:5px;display:block">
+    </a>
+
+    <div style="flex:1;min-width:0">
+      <div style="font-weight:800;font-size:15px;margin-bottom:4px">{{ m[1] }}</div>
+      <div class="muted small mb">{{ m[2] }} · {{ '머신' if m[3] else '전신거울' }}</div>
+      <div class="muted small" style="word-break:break-all;font-size:11px">
+        {{ request.host_url }}machine/{{ m[0] }}/
+      </div>
+      <div class="btnrow mt">
+        <a href="/machine/{{ m[0] }}/qr.png" download="{{ m[1] }}_QR.png">
+          <button class="btn sm sec" type="button">💾 저장</button>
+        </a>
+        <a href="/machine/{{ m[0] }}/">
+          <button class="btn sm" type="button">정보 보기</button>
+        </a>
+      </div>
+    </div>
+  </div>
+{% else %}
+  <div class="card center muted">등록된 종목이 없습니다.</div>
+{% endfor %}
+
 {% endblock %}
